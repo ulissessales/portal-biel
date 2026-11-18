@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal de Estudos | Biel</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Scrollbar & Checkboxes */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.04); }
+        ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,0.7); }
+
+        .check-pill {
+            transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+        }
+        .check-pill:active {
+            transform: scale(0.95);
+        }
+        .topic-row {
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.75; }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- BARRA DE ADMINISTRAÇÃO / TROCA DE PERFIL (Ocultável no Modo Link Individual) -->
+    
+
+    <!-- Botão Flutuante Discreto para reabrir barra caso ocultada -->
+    
+
+    <!-- CABEÇALHO PRINCIPAL DO CANDIDATO -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                
+                <!-- Identificação do Candidato & Cargo -->
+                <div class="flex items-start sm:items-center gap-3.5">
+                    <div id="candidate-avatar" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl sm:text-2xl shadow-md shrink-0">
+                        B
+                    </div>
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h1 id="candidate-title" class="font-display font-extrabold text-lg sm:text-2xl text-slate-900 dark:text-white tracking-tight">
+                                Carregando...
+                            </h1>
+                            <span id="candidate-badge-banca" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                Banca
+                            </span>
+                        </div>
+                        <p id="candidate-subtitle" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
+                            Cargo e Edital
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Contagem Regressiva & Ações Rápidas -->
+                <div class="flex flex-wrap items-center justify-between sm:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
+                    <!-- Contador de Dias até a Prova -->
+                    <div class="flex items-center gap-2.5 bg-slate-100 dark:bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                        <i class="ph-duotone ph-calendar-check text-2xl text-blue-600 dark:text-blue-400"></i>
+                        <div>
+                            <div class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" id="exam-date-label">PROVA: 17/01/2027</div>
+                            <div class="font-display font-bold text-sm sm:text-base text-slate-900 dark:text-white" id="exam-countdown-text">Calculando...</div>
+                        </div>
+                    </div>
+
+                    <!-- Link Direto Plataforma de Questões -->
+                    <a id="header-questions-btn" href="#" target="_blank" rel="noopener" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-3.5 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition">
+                        <i class="ph-bold ph-check-square-offset text-lg"></i>
+                        <span id="header-questions-label">Banco de Questões</span>
+                        <i class="ph-bold ph-arrow-square-out text-xs opacity-80"></i>
+                    </a>
+
+                    <!-- Botão Modo Escuro -->
+                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700" title="Alternar Tema Claro/Escuro">
+                        <i id="theme-icon" class="ph-duotone ph-moon text-lg"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- NAVEGAÇÃO DE ABAS DO PORTAL -->
+            <nav class="flex items-center gap-1 sm:gap-2 mt-4 pt-2 border-t border-slate-100 dark:border-slate-800/80 overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('edital')" id="tab-btn-edital" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="ph-duotone ph-list-checks text-lg"></i>
+                    <span>1. Edital Verticalizado</span>
+                </button>
+                <button onclick="switchTab('guia')" id="tab-btn-guia" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="ph-duotone ph-compass-tool text-lg"></i>
+                    <span>2. Como Estudar & Usar o Anki</span>
+                </button>
+                <button onclick="switchTab('erros')" id="tab-btn-erros" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="ph-duotone ph-notebook text-lg"></i>
+                    <span>3. Caderno de Erros & Flashcards</span>
+                    <span id="erros-count-badge" class="px-1.5 py-0.2 text-[11px] rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">0</span>
+                </button>
+                <button onclick="switchTab('backup')" id="tab-btn-backup" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+                    <i class="ph-duotone ph-cloud-arrow-up text-lg"></i>
+                    <span>4. Salvar / Backup & Customizar</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        <!-- RESUMO DE PROGRESSO E FICHA ESTRATÉGICA DO CARGO -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+            
+            <!-- Card de Progresso Geral e Pilares (7 colunas) -->
+            <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div>
+                            <h2 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                                <i class="ph-fill ph-chart-polar text-blue-600 dark:text-blue-400"></i>
+                                Seu Progresso no Edital
+                            </h2>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Tudo o que você marca fica salvo automaticamente neste aparelho.</p>
+                        </div>
+                        <div class="text-right">
+                            <span id="overall-pct-text" class="font-display font-extrabold text-2xl sm:text-3xl text-blue-600 dark:text-blue-400">0%</span>
+                            <span class="block text-[11px] text-slate-500 dark:text-slate-400 font-medium" id="overall-items-count">0 de 0 metas</span>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Progresso Global -->
+                    <div class="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-700/60">
+                        <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- 4 Mini-Cards dos Pilares: Teoria, Revisão, Questões, Aproveitamento -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5">
+                    <div class="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/60 rounded-xl p-3">
+                        <div class="flex items-center justify-between text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                            <span>1. Teoria</span>
+                            <i class="ph-bold ph-book-open-text"></i>
+                        </div>
+                        <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-teoria-pct">0%</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-teoria-count">0/0 tópicos</div>
+                    </div>
+
+                    <div class="bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/60 rounded-xl p-3">
+                        <div class="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-semibold">
+                            <span>2. Revisão/Anki</span>
+                            <i class="ph-bold ph-lightning"></i>
+                        </div>
+                        <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-revisao-pct">0%</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-revisao-count">0/0 tópicos</div>
+                    </div>
+
+                    <div class="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/60 rounded-xl p-3">
+                        <div class="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+                            <span>3. Questões</span>
+                            <i class="ph-bold ph-check-circle"></i>
+                        </div>
+                        <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-questoes-pct">0%</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-questoes-count">0/0 tópicos</div>
+                    </div>
+
+                    <div class="bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900/60 rounded-xl p-3">
+                        <div class="flex items-center justify-between text-purple-700 dark:text-purple-300 text-xs font-semibold">
+                            <span>Desempenho</span>
+                            <i class="ph-bold ph-target"></i>
+                        </div>
+                        <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-acertos-pct">--%</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-acertos-count">0 acertos / 0 feitas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card de Alerta Estratégico & Raio-X da Prova (5 colunas) -->
+            <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-900 dark:to-slate-950 text-white rounded-2xl p-5 border border-slate-700 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center gap-1">
+                            <i class="ph-fill ph-warning-octagon"></i> Regra de Ouro do Edital
+                        </span>
+                        <span id="card-salary-badge" class="text-xs font-semibold text-emerald-300 bg-emerald-500/15 px-2.5 py-0.5 rounded-md border border-emerald-500/30">
+                            Salário & Vagas
+                        </span>
+                    </div>
+                    <h3 id="strategy-card-title" class="font-display font-bold text-base sm:text-lg text-white mt-1">
+                        Onde está a sua aprovação
+                    </h3>
+                    <p id="strategy-card-desc" class="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
+                        Descrição da estratégia...
+                    </p>
+                </div>
+
+                <!-- Pesos por Matéria -->
+                <div id="discipline-weights-box" class="mt-4 pt-3 border-t border-slate-700/80 space-y-2">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- ABA 1: EDITAL VERTICALIZADO INTERATIVO                            -->
+        <!-- ================================================================= -->
+        <section id="tab-content-edital" class="space-y-5">
+            
+            <!-- Barra de Filtros, Pesquisa e Legenda -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+                
+                <!-- Campo de Busca -->
+                <div class="relative flex-1">
+                    <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="topic-search-input" oninput="renderSyllabus()" placeholder="Buscar assunto no edital (ex: Crase, Arquivística, EPI, Licitação, Porcentagem)..." class="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-slate-100">
+                    <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                        <i class="ph-bold ph-x-circle"></i>
+                    </button>
+                </div>
+
+                <!-- Filtros de Status -->
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button onclick="setFilterStatus('all')" id="filter-btn-all" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                        Todos
+                    </button>
+                    <button onclick="setFilterStatus('pending')" id="filter-btn-pending" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                        Não Iniciados
+                    </button>
+                    <button onclick="setFilterStatus('progress')" id="filter-btn-progress" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                        Em Estudo
+                    </button>
+                    <button onclick="setFilterStatus('done')" id="filter-btn-done" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                        Concluídos (3/3)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dica Rápida de Uso dos Botões -->
+            <div class="bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/70 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-blue-900 dark:text-blue-200">
+                <div class="flex items-center gap-2">
+                    <i class="ph-fill ph-info text-blue-600 dark:text-blue-400 text-base shrink-0"></i>
+                    <span><strong>Dica prática:</strong> Clique em <span class="underline font-semibold">Vídeo-aula</span> para abrir aulas daquele assunto no YouTube, ou em <span class="underline font-semibold">Fazer Questões</span> para treinar o tópico agora mesmo!</span>
+                </div>
+                <button onclick="openAddTopicModal()" class="text-blue-700 dark:text-blue-300 hover:underline font-bold flex items-center gap-1 shrink-0">
+                    <i class="ph-bold ph-plus-circle"></i> Adicionar Tópico Extra
+                </button>
+            </div>
+
+            <!-- Container das Disciplinas e Tópicos Verticalizados -->
+            <div id="syllabus-container" class="space-y-6">
+                <!-- Preenchido dinamicamente via JS -->
+            </div>
+
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- ABA 2: GUIA DE ESTUDOS, ESTRATÉGIA E COMO USAR O ANKI             -->
+        <!-- ================================================================= -->
+        <section id="tab-content-guia" class="hidden space-y-6">
+            
+            <!-- Bloco 1: Estratégia Específica para o Cargo do Candidato -->
+            <div id="custom-candidate-strategy-guide" class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <!-- Preenchido via JS conforme o perfil selecionado -->
+            </div>
+
+            <!-- Bloco 2: Método dos 3 Passos (Teoria Curta + Questões + Anki) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center font-display font-bold text-lg mb-3">
+                        1
+                    </div>
+                    <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">Estudo Direto ao Ponto (Sem Enrolação)</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                        Não tente decorar livros gigantes. Clique no botão <strong>"Vídeo-aula"</strong> ao lado do tópico no seu checklist, assista a uma aula focada de 15 a 30 minutos no YouTube anotando só as palavras-chave (prazos, proibições, conceitos) e marque a caixinha <strong>Teoria</strong>.
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-display font-bold text-lg mb-3">
+                        2
+                    </div>
+                    <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">Estudo Reverso por Questões (O Segredo)</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                        Quem passa em concurso é quem acerta bolinha no gabarito! Logo após ver a teoria (ou até antes, nas matérias fáceis), clique em <strong>"Questões"</strong>. Resolva de 10 a 20 questões do tema. Errou alguma? Veja o porquê e anote na aba <strong>Caderno de Erros</strong> aqui do site.
+                    </p>
+                </div>
+
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center font-display font-bold text-lg mb-3">
+                        3
+                    </div>
+                    <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">Revisão Ativa com Anki (Nunca Mais Esqueça)</h3>
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                        O cérebro esquece 70% do que leu em 7 dias se você não revisar. Em vez de reler caderno inteiro, transforme seus erros em cartões de pergunta e resposta no <strong>Anki</strong> (ou na aba 3 aqui do site) e revise 15 minutinhos por dia no celular!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bloco 3: Tutorial Completo e Prático do ANKI -->
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Guia Passo a Passo</span>
+                        <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5 flex items-center gap-2">
+                            <i class="ph-fill ph-cards text-amber-500"></i>
+                            Como Usar o Anki do Jeito Certo (PC e Celular)
+                        </h3>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="https://apps.ankiweb.net/" target="_blank" rel="noopener" class="text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                            <i class="ph-bold ph-desktop"></i> Baixar Anki PC (Grátis)
+                        </a>
+                        <a href="https://play.google.com/store/apps/details?id=com.ichi2.anki" target="_blank" rel="noopener" class="text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                            <i class="ph-bold ph-android-logo"></i> AnkiDroid (Grátis)
+                        </a>
+                        <a href="https://ankiweb.net/" target="_blank" rel="noopener" class="text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
+                            <i class="ph-bold ph-globe"></i> AnkiWeb (iPhone/Navegador)
+                        </a>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        <h4 class="font-display font-bold text-slate-900 dark:text-white text-base">O que é o Anki?</h4>
+                        <p>
+                            O Anki é um aplicativo gratuito de <strong>cartões de memória (flashcards)</strong> com repetição espaçada. Você coloca uma <strong>Pergunta na Frente</strong> e uma <strong>Resposta Curta no Verso</strong>.
+                        </p>
+                        <p>
+                            Quando você acerta o cartão facilmente, o Anki só te mostra aquela pergunta de novo daqui a 4 dias, depois 10 dias, depois 25 dias. Quando você erra ou acha difícil, ele te mostra de novo no dia seguinte! Assim você foca 100% do tempo apenas no que ainda não decorou.
+                        </p>
+                        <div class="bg-slate-50 dark:bg-slate-800/70 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
+                            <div class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <i class="ph-fill ph-check-fat text-emerald-500"></i> As 3 Regras para Criar Bons Cartões:
+                            </div>
+                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                <li><strong>Regra 1 (Curto e Direto):</strong> Nunca copie uma página inteira no cartão. Cada cartão deve cobrar apenas 1 informação ou pegadinha.</li>
+                                <li><strong>Regra 2 (Crie a partir dos seus Erros):</strong> Só crie cartão daquilo que você errou em questão ou de listas/prazos fáceis de esquecer.</li>
+                                <li><strong>Regra 3 (Use a Aba 3 deste site!):</strong> Tudo o que você cadastrar na aba <em>"Caderno de Erros"</em> aqui do portal pode ser estudado como Flashcard na hora ou exportado em 1 clique para o Anki!</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Exemplo Visual de Cartão Ruim vs Cartão Bom -->
+                    <div class="space-y-3">
+                        <div class="p-4 rounded-xl bg-rose-50/70 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/60">
+                            <div class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase flex items-center gap-1.5">
+                                <i class="ph-fill ph-x-circle"></i> Jeito Errado (Cartão Gigante e Cansativo)
+                            </div>
+                            <p class="text-xs text-slate-700 dark:text-slate-300 mt-1.5">
+                                <strong>Frente:</strong> Fale tudo sobre limpeza concorrente, terminal e produtos químicos.<br>
+                                <strong>Verso:</strong> (Um texto enorme de 15 linhas que dá preguiça de ler e você nunca sabe se acertou tudo).
+                            </p>
+                        </div>
+
+                        <div class="p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/60">
+                            <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase flex items-center gap-1.5">
+                                <i class="ph-fill ph-check-circle"></i> Jeito Certo (Rápido, Certeiro e Fácil de Revisar)
+                            </div>
+                            <div class="text-xs text-slate-700 dark:text-slate-300 mt-1.5 space-y-2">
+                                <div>
+                                    <strong>Frente (Pergunta):</strong> Qual a diferença entre <em>Limpeza Concorrente</em> e <em>Limpeza Terminal</em>?<br>
+                                    <strong>Verso (Resposta):</strong> <u>Concorrente</u> = diária/rotineira (enquanto o local funciona). <u>Terminal</u> = completa/profunda (inclui tetos, paredes e máquinas).
+                                </div>
+                                <div class="pt-2 border-t border-emerald-200/60 dark:border-emerald-800/60">
+                                    <strong>Frente (Pergunta):</strong> O que significa a regra <em>PVPS</em> no estoque da despensa/merenda?<br>
+                                    <strong>Verso (Resposta):</strong> <u>P</u>rimeiro que <u>V</u>ence é o <u>P</u>rimeiro que <u>S</u>ai!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- ABA 3: CADERNO DE ERROS & TREINADOR DE FLASHCARDS (ESTILO ANKI)   -->
+        <!-- ================================================================= -->
+        <section id="tab-content-erros" class="hidden space-y-6">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Formulário para Adicionar Erro / Flashcard (5 colunas) -->
+                <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm h-fit">
+                    <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="ph-fill ph-plus-square text-blue-600 dark:text-blue-400"></i>
+                        Registrar Erro ou Novo Flashcard
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        Errou uma questão no Estude Grátis ou Qconcursos? Anote a pegadinha aqui para revisar antes da prova!
+                    </p>
+
+                    <form onsubmit="addFlashcard(event)" class="mt-4 space-y-3.5">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Disciplina / Matéria</label>
+                            <select id="fc-discipline" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100">
+                                <option value="Conhecimentos Específicos">Conhecimentos Específicos (Peso Maior)</option>
+                                <option value="Língua Portuguesa">Língua Portuguesa</option>
+                                <option value="Matemática / Raciocínio Lógico">Matemática / Raciocínio Lógico</option>
+                                <option value="Legislação / Discursiva">Legislação / Discursiva</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Frente do Cartão (A Pergunta ou Pegadinha da Questão)</label>
+                            <textarea id="fc-front" required rows="2" placeholder="Ex: Pode misturar água sanitária (cloro) com amônia ou ácidos para limpar banheiro?" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Verso do Cartão (A Regra Correta e Direta)</label>
+                            <textarea id="fc-back" required rows="3" placeholder="Ex: PROIBIDO! Essa mistura libera gases tóxicos graves (cloraminas/gás cloro) que causam intoxicação respiratória." class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"></textarea>
+                        </div>
+
+                        <div class="flex items-center gap-2 pt-1">
+                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+                                <i class="ph-bold ph-floppy-disk"></i> Salvar no Caderno de Erros
+                            </button>
+                            <button type="button" onclick="loadSampleFlashcards()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs py-2.5 px-3 rounded-xl transition" title="Carregar 5 cartões prontos de revisão para o seu cargo">
+                                + Exemplos do Cargo
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Lista de Cartões + Modo Treino Rápido (7 colunas) -->
+                <div class="lg:col-span-7 space-y-4">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+                            <div>
+                                <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i class="ph-fill ph-stack text-amber-500"></i>
+                                    Seus Cartões de Revisão
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Clique em qualquer cartão para virar e ver a resposta, ou exporte para o aplicativo Anki.</p>
+                            </div>
+                            <button onclick="exportAnkiTSV()" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm">
+                                <i class="ph-bold ph-download-simple"></i> Exportar para Anki (.txt/.csv)
+                            </button>
+                        </div>
+
+                        <div id="flashcards-list-container" class="mt-4 space-y-3">
+                            <!-- Preenchido via JS -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ================================================================= -->
+        <!-- ABA 4: BACKUP, EXPORTAR/IMPORTAR DADOS E CUSTOMIZAÇÃO             -->
+        <!-- ================================================================= -->
+        <section id="tab-content-backup" class="hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Card Exportar / Importar JSON -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl">
+                            <i class="ph-duotone ph-shield-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">Backup de Segurança (Celular ⇄ PC)</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Salve uma cópia do seu progresso ou transfira do celular para o computador.</p>
+                        </div>
+                    </div>
+
+                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Suas marcações ficam salvas automaticamente no navegador deste aparelho. Se quiser abrir seu progresso em outro celular ou computador (ou guardar uma cópia de segurança), clique em <strong>Baixar Backup</strong> abaixo.
+                    </p>
+
+                    <div class="flex flex-wrap gap-3 pt-2">
+                        <button onclick="exportBackupJSON()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm">
+                            <i class="ph-bold ph-download-simple"></i> Baixar Meu Backup (.json)
+                        </button>
+
+                        <label class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition cursor-pointer border border-slate-200 dark:border-slate-700">
+                            <i class="ph-bold ph-upload-simple"></i> Carregar Backup Salvo
+                            <input type="file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Card Links Individuais para Subdomínios -->
+                
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL PARA ADICIONAR NOVO TÓPICO AO EDITAL -->
+    <div id="add-topic-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Adicionar Tópico ao Edital</h3>
+                <button onclick="closeAddTopicModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="saveCustomTopic(event)" class="space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Em qual matéria?</label>
+                    <select id="custom-topic-section" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nome do Tópico / Assunto</label>
+                    <input type="text" id="custom-topic-title" required placeholder="Ex: Lei Orgânica Municipal - Artigos 1 ao 45" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Termo curto para busca no YouTube / Questões</label>
+                    <input type="text" id="custom-topic-query" placeholder="Ex: Lei Organica Municipal Concurso" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAddTopicModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white">Adicionar ao Checklist</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST DE NOTIFICAÇÃO (Sem usar alert!) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+    <!-- RODAPÉ -->
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-4 sm:px-6 mt-10 text-xs text-slate-500 dark:text-slate-400">
+        <div class="max-w-7xl mx-auto flex items-center justify-end gap-2">
+            
+            <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                    <i class="ph-fill ph-check-circle"></i> Salvamento Automático Ativo
+                </span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ================================================================= -->
+    <!-- LÓGICA COMPLETA E BANCO DE DADOS DOS 5 EDITAIS VERTICALIZADOS     -->
+    <!-- ================================================================= -->
+    <script>
+        // Dados Completos dos 5 Perfis extraídos fielmente dos Editais 01/2026 (Inhapim e Contagem)
+        const CANDIDATE_PROFILES = {
+            biel: {
+                id: 'biel',
+                name: 'Biel',
+                avatarLetter: 'B',
+                avatarColor: 'from-blue-600 to-indigo-700',
+                role: 'Agente Administrativo (Opção extra: Auxiliar Administrativo)',
+                city: 'Prefeitura de Inhapim/MG • Edital nº 01/2026',
+                banca: 'Fronte Concursos',
+                examDate: '2027-01-17T13:00:00',
+                examDateFormatted: '17/01/2027 (Tarde)',
+                salaryInfo: '10 Vagas • R$ 2.170,71 (40h)',
+                questionPlatformName: 'Estude Grátis',
+                questionPlatformType: 'estudegratis',
+                questionPlatformUrl: 'https://www.estudegratis.com.br/questoes-de-concurso',
+                strategyTitle: 'Foco Total nos 75%: Conhecimentos Específicos valem 3,75 pts por questão!',
+                strategyDesc: 'Biel, sua prova tem 30 questões (A, B, C, D). As 20 questões de Conhecimentos Específicos valem 75 pontos da prova inteira e são o critério de desempate! Mas atenção: é proibido zerar Português ou Matemática (precisa acertar pelo menos 1 de cada e fazer 50 pontos no total).',
+                weights: [
+                    { name: 'Conhecimentos Específicos (20 questões x 3,75 pts)', pct: 75, color: 'bg-blue-500' },
+                    { name: 'Língua Portuguesa Médio (05 questões x 2,50 pts)', pct: 12.5, color: 'bg-emerald-500' },
+                    { name: 'Matemática Médio (05 questões x 2,50 pts)', pct: 12.5, color: 'bg-amber-500' }
+                ],
+                sampleFlashcards: [
+                    { discipline: 'Conhecimentos Específicos', front: 'Quais são os 5 princípios do atendimento ao cidadão expressos no edital de Agente Administrativo?', back: 'Cordialidade, Presteza, Urbanidade, Eficiência e Respeito.' },
+                    { discipline: 'Conhecimentos Específicos', front: 'Na Arquivística, qual a diferença entre o método de arquivamento Alfabético e o Cronológico?', back: 'Alfabético: organiza pelo nome (regra de alfabetação). Cronológico: organiza pela data (ano, mês e dia) do documento.' },
+                    { discipline: 'Conhecimentos Específicos', front: 'O que é Protocolo na rotina administrativa?', back: 'É o setor/conjunto de operações encarregado do recebimento, registro, classificação, distribuição e controle da tramitação de documentos.' },
+                    { discipline: 'Língua Portuguesa', front: 'Quando ocorre Crase obrigatória antes de palavras femininas?', back: 'Quando o termo anterior exige a preposição "A" e o termo seguinte aceita o artigo feminino "A" (Dica: troque a feminina por uma masculina; se virar "AO", tem crase!).' }
+                ],
+                sections: [
+                    {
+                        id: 'biel-sec-ce',
+                        title: 'Parte I: Conhecimentos Específicos - Agente Administrativo',
+                        badge: '20 Questões • 75,0 Pontos (75% da Prova)',
+                        badgeColor: 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300',
+                        topics: [
+                            { id: 'biel-ce-1.1', title: '1.1. Qualidade no Atendimento: Princípios no serviço público (cordialidade, presteza, urbanidade, eficiência e respeito)', query: 'Qualidade no Atendimento ao Publico Cordialidade Presteza Urbanidade Concurso' },
+                            { id: 'biel-ce-1.2', title: '1.2. Atendimento Presencial e Telefônico: Técnicas de recepção, triagem de demandas, escuta ativa e clareza na transmissão', query: 'Atendimento Presencial e Telefonico Recepção Escuta Ativa Concurso' },
+                            { id: 'biel-ce-1.3', title: '1.3. Anotação correta de recados e chamados internos/externos', query: 'Atendimento Telefonico Anotacao de Recados Rotinas Administrativas Concurso' },
+                            { id: 'biel-ce-1.4', title: '1.4. Ética e Postura Profissional: Sigilo profissional, discrição, moralidade administrativa e postura do servidor', query: 'Etica no Servico Publico Sigilo Profissional Moralidade Administrativa Concurso' },
+                            { id: 'biel-ce-1.5', title: '1.5. Gestão de Conflitos: Situações de estresse, atendimento a cidadãos insatisfeitos e resolução pacífica no balcão', query: 'Gestao de Conflitos no Atendimento ao Publico Concurso' },
+                            { id: 'biel-ce-2.1', title: '2.1. Noções de Arquivística: Arquivo, protocolo, tramitação, recebimento, registro, expedição e circulação de documentos', query: 'Nocoes de Arquivistica Protocolo Recebimento Tramitacao Expedicao Concurso' },
+                            { id: 'biel-ce-2.2', title: '2.2. Organização Física e Digital: Abertura, rotulação, identificação e organização de pastas, dossiês e livros de registro', query: 'Arquivologia Organizacao de Pastas Dossies Documentos Concurso' },
+                            { id: 'biel-ce-2.3', title: '2.3. Métodos de Arquivamento: Sistemas básicos (alfabético, numérico, cronológico, geográfico e por assunto/ideográfico)', query: 'Metodos de Arquivamento Alfabetico Numerico Cronologico Geografico Assunto Concurso' },
+                            { id: 'biel-ce-2.4', title: '2.4. Noções de conservação e preservação de documentos públicos', query: 'Conservacao e Preservacao de Documentos Arquivologia Concurso' },
+                            { id: 'biel-ce-3.1', title: '3.1. Processos de Trabalho e Rotinas Administrativas: Apoio técnico administrativo no Executivo Municipal', query: 'Rotinas Administrativas Agente Administrativo Prefeitura Concurso' },
+                            { id: 'biel-ce-3.2', title: '3.2. Operação de Equipamentos de Escritório: Uso e conservação de copiadoras (fotocópias), impressoras, scanners e telefonia', query: 'Equipamentos de Escritorio Rotinas Administrativas Concurso' },
+                            { id: 'biel-ce-3.3', title: '3.3. Controle de Materiais e Patrimônio: Suprimentos básicos de escritório, zelo pelo patrimônio público e organização', query: 'Controle de Materiais Almoxarifado e Patrimonio Basico Concurso' },
+                            { id: 'biel-ce-4.1', title: '4.1. Redação de Comunicações Simples: Anotações de recados, livros de plantão/atendimento, memorandos simples e e-mails corporativos', query: 'Redacao Oficial Memorando Comunicacoes Administrativas Concurso' },
+                            { id: 'biel-ce-4.2', title: '4.2. Gramática e Ortografia Aplicada ao Trabalho: Ortografia oficial, acentuação, pontuação, concordância e clareza escrita', query: 'Portugues e Redacao Oficial Clareza Concisao Concurso' }
+                        ]
+                    },
+                    {
+                        id: 'biel-sec-pt',
+                        title: 'Parte II: Língua Portuguesa (Nível Médio)',
+                        badge: '05 Questões • 12,5 Pontos (Proibido Zerar)',
+                        badgeColor: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300',
+                        topics: [
+                            { id: 'biel-pt-1', title: '1. Interpretação e Análise de Textos; Coesão Textual; Qualidades e defeitos de um texto', query: 'Interpretacao de Textos e Coesao Textual Concurso' },
+                            { id: 'biel-pt-2', title: '2. Tipos de Comunicação (Descrição, Narração, Dissertação) e Tipos de Discurso (Direto, Indireto)', query: 'Tipologia Textual Narracao Descricao Dissertacao Tipos de Discurso Concurso' },
+                            { id: 'biel-pt-3', title: '3. Fonologia: Fonemas, sílabas, divisão silábica, encontros vocálicos, encontros consonantais e dígrafos', query: 'Fonologia Fonemas Silabas Encontros Vocalicos Digrafos Concurso' },
+                            { id: 'biel-pt-4', title: '4. Ortografia Oficial e Uso do Hífen', query: 'Ortografia Oficial e Uso do Hifen Concurso' },
+                            { id: 'biel-pt-5', title: '5. Acentuação Tônica e Gráfica: Regras básicas, especiais, hiatos, ditongos e acentos diferenciais', query: 'Acentuacao Grafica Regras Concurso' },
+                            { id: 'biel-pt-6', title: '6. Morfologia: Estrutura e Formação das Palavras (Derivação, Composição, Prefixos e Sufixos)', query: 'Estrutura e Formacao das Palavras Derivacao e Composicao Concurso' },
+                            { id: 'biel-pt-7', title: '7. Classes de Palavras e Estudo dos Verbos Regulares e Irregulares', query: 'Classes de Palavras Morfologia e Verbos Concurso' },
+                            { id: 'biel-pt-8', title: '8. Sintaxe da Oração e do Período: Termos essenciais (Sujeito/Predicado), integrantes e acessórios', query: 'Sintaxe Termos Essenciais Integrantes e Acessorios da Oracao Concurso' },
+                            { id: 'biel-pt-9', title: '9. Sintaxe de Concordância Verbal e Concordância Nominal', query: 'Concordancia Verbal e Nominal Concurso' },
+                            { id: 'biel-pt-10', title: '10. Sintaxe de Regência (Verbal e Nominal) e Uso da Crase', query: 'Regencia Verbal Nominal e Crase Concurso' },
+                            { id: 'biel-pt-11', title: '11. Colocação Pronominal (Próclise, Mesóclise, Ênclise) e Funções das palavras "QUE" e "SE"', query: 'Colocacao Pronominal e Funcoes do Que e Se Concurso' },
+                            { id: 'biel-pt-12', title: '12. Sinais de Pontuação (Uso da Vírgula, Ponto, etc.)', query: 'Pontuacao Uso da Virgula Concurso' },
+                            { id: 'biel-pt-13', title: '13. Estilística: Figuras de Linguagem e Vícios de Linguagem', query: 'Figuras de Linguagem e Vicios de Linguagem Concurso' }
+                        ]
+                    },
+                    {
+                        id: 'biel-sec-mat',
+                        title: 'Parte III: Matemática (Nível Médio)',
+                        badge: '05 Questões • 12,5 Pontos (Proibido Zerar)',
+                        badgeColor: 'bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300',
+                        topics: [
+                            { id: 'biel-mat-1', title: '1. Conjunto de números reais; Operações com inteiros e frações; MDC, MMC e Raiz quadrada', query: 'MMC MDC e Operacoes com Fracoes Matematica Concurso' },
+                            { id: 'biel-mat-2', title: '2. Radicais: operações, simplificação, propriedades e racionalização de denominadores', query: 'Radicais Simplificacao e Racionalizacao de Denominadores Concurso' },
+                            { id: 'biel-mat-3', title: '3. Razão e Proporção; Grandezas Proporcionais; Regra de Três Simples e Composta', query: 'Razao Proporcao e Regra de Tres Simples e Composta Concurso' },
+                            { id: 'biel-mat-4', title: '4. Porcentagem; Juros Simples e Compostos; Sistema Monetário Nacional (Real)', query: 'Porcentagem Juros Simples e Compostos Concurso' },
+                            { id: 'biel-mat-5', title: '5. Sistema de Medidas: comprimento, superfície, massa, capacidade, tempo e volume', query: 'Sistema de Medidas Conversao de Unidades Matematica Concurso' },
+                            { id: 'biel-mat-6', title: '6. Expressões Algébricas e Fracionárias (fatoração, operações e simplificação)', query: 'Expressoes Algebricas e Fatoracao Concurso' },
+                            { id: 'biel-mat-7', title: '7. Equação de 1º grau, Equação de 2º grau (Bhaskara e problemas) e Sistemas Lineares', query: 'Equacao de 1 e 2 Grau e Sistemas Lineares Concurso' },
+                            { id: 'biel-mat-8', title: '8. Relação e Função (domínio, imagem); Função do 1º grau e Função do 2º grau', query: 'Funcao do 1 Grau e 2 Grau Concurso' },
+                            { id: 'biel-mat-9', title: '9. Função Exponencial e Função Logarítmica', query: 'Funcao Exponencial e Logaritmica Concurso' },
+                            { id: 'biel-mat-10', title: '10. Progressão Aritmética (PA), Progressão Geométrica (PG) e Números Complexos', query: 'Progressao Aritmetica PA e Geometrica PG Concurso' },
+                            { id: 'biel-mat-11', title: '11. Análise Combinatória e Probabilidade', query: 'Analise Combinatoria e Probabilidade Concurso' },
+                            { id: 'biel-mat-12', title: '12. Geometria Plana, Espacial, Analítica e Trigonometria (seno, cosseno, tangente)', query: 'Geometria Plana Areas Perimetros e Espacial Concurso' }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // Estado Atual da Aplicação
+        const FIXED_PROFILE_ID = 'biel';
+        let currentProfileId = FIXED_PROFILE_ID;
+        let currentTab = 'edital';
+        let currentFilterStatus = 'all';
+        let userProgress = {}; // Salvo no localStorage por perfil
+
+        // =================================================================
+        // INICIALIZAÇÃO E ROTEAMENTO AUTOMÁTICO (SUBDOMÍNIO OU URL PARAM)
+        // =================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            currentProfileId = 'biel';
+            initTheme();
+            loadUserProgress();
+            applyCurrentProfile();
+        });
+
+        // Perfil fixo deste repositório: Biel.
+        // Todo o progresso permanece neste navegador por meio do localStorage.
+
+        // =================================================================
+        // GERENCIAMENTO DE DADOS NO LOCALSTORAGE
+        // =================================================================
+        function getStorageKey(profileId = currentProfileId) {
+            return `portal_estudos_v1_${profileId}`;
+        }
+
+        function loadUserProgress() {
+            const raw = localStorage.getItem(getStorageKey());
+            if (raw) {
+                try {
+                    userProgress = JSON.parse(raw);
+                } catch (e) {
+                    userProgress = { topics: {}, customTopics: [], flashcards: [] };
+                }
+            } else {
+                userProgress = { topics: {}, customTopics: [], flashcards: [] };
+            }
+            if (!userProgress.topics) userProgress.topics = {};
+            if (!userProgress.customTopics) userProgress.customTopics = [];
+            if (!userProgress.flashcards) userProgress.flashcards = [];
+        }
+
+        function saveUserProgress() {
+            localStorage.setItem(getStorageKey(), JSON.stringify(userProgress));
+            updateDashboardStats();
+        }
+
+        // =================================================================
+        // RENDERIZAÇÃO DA INTERFACE DO CANDIDATO
+        // =================================================================
+
+        function applyCurrentProfile() {
+            const profile = CANDIDATE_PROFILES[currentProfileId];
+            document.title = `Painel de Estudos - ${profile.name} | ${profile.role}`;
+
+            // Avatar & Títulos
+            const avatar = document.getElementById('candidate-avatar');
+            avatar.className = `w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl sm:text-2xl shadow-md shrink-0 bg-gradient-to-br ${profile.avatarColor}`;
+            avatar.textContent = profile.avatarLetter;
+
+            document.getElementById('candidate-title').textContent = `Portal de Estudos: ${profile.name}`;
+            document.getElementById('candidate-badge-banca').textContent = `Banca: ${profile.banca}`;
+            document.getElementById('candidate-subtitle').textContent = `${profile.role} • ${profile.city}`;
+
+            // Data da prova e Contagem Regressiva
+            document.getElementById('exam-date-label').textContent = `PROVA: ${profile.examDateFormatted}`;
+            updateExamCountdown(profile.examDate);
+
+            // Botão Principal da Plataforma de Questões
+            const qBtn = document.getElementById('header-questions-btn');
+            qBtn.href = profile.questionPlatformUrl;
+            document.getElementById('header-questions-label').textContent = `Abrir ${profile.questionPlatformName}`;
+
+            // Card Estratégico
+            document.getElementById('card-salary-badge').textContent = profile.salaryInfo;
+            document.getElementById('strategy-card-title').textContent = profile.strategyTitle;
+            document.getElementById('strategy-card-desc').textContent = profile.strategyDesc;
+
+            // Barras de Peso do Edital
+            const weightsBox = document.getElementById('discipline-weights-box');
+            weightsBox.innerHTML = profile.weights.map(w => `
+                <div>
+                    <div class="flex justify-between text-xs font-medium text-slate-200 mb-1">
+                        <span class="truncate pr-2">${w.name}</span>
+                        <span class="font-bold shrink-0">${w.pct}%</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                        <div class="h-full ${w.color} rounded-full" style="width: ${w.pct}%"></div>
+                    </div>
+                </div>
+            `).join('');
+
+            // Renderiza Abas
+            switchTab(currentTab);
+            renderSyllabus();
+            renderCandidateStrategyGuide();
+            renderFlashcards();
+            updateDashboardStats();
+        }
+
+        function updateExamCountdown(dateStr) {
+            const target = new Date(dateStr);
+            const now = new Date();
+            const diffTime = target - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            const el = document.getElementById('exam-countdown-text');
+
+            if (diffDays > 0) {
+                el.innerHTML = `Faltam <span class="text-blue-600 dark:text-blue-400">${diffDays} dias</span>`;
+            } else if (diffDays === 0) {
+                el.innerHTML = `<span class="text-emerald-600">É HOJE! Boa Prova!</span>`;
+            } else {
+                el.innerHTML = `<span class="text-slate-500">Prova Realizada</span>`;
+            }
+        }
+
+        // =================================================================
+        // RENDERIZAÇÃO DO EDITAL VERTICALIZADO (CHECKLIST + AÇÕES)
+        // =================================================================
+        function getMergedSections() {
+            const profile = CANDIDATE_PROFILES[currentProfileId];
+            // Clona as seções oficiais e adiciona eventuais tópicos customizados criados pelo usuário
+            return profile.sections.map(sec => {
+                const customForSec = (userProgress.customTopics || []).filter(ct => ct.sectionId === sec.id);
+                return {
+                    ...sec,
+                    topics: [...sec.topics, ...customForSec]
+                };
+            });
+        }
+
+        function renderSyllabus() {
+            const container = document.getElementById('syllabus-container');
+            const searchQuery = (document.getElementById('topic-search-input').value || '').trim().toLowerCase();
+            const clearBtn = document.getElementById('clear-search-btn');
+            clearBtn.classList.toggle('hidden', !searchQuery);
+
+            // Atualiza estilo dos botões de filtro
+            ['all', 'pending', 'progress', 'done'].forEach(st => {
+                const btn = document.getElementById(`filter-btn-${st}`);
+                if (st === currentFilterStatus) {
+                    btn.className = 'filter-chip px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-xs transition';
+                } else {
+                    btn.className = 'filter-chip px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition';
+                }
+            });
+
+            const sections = getMergedSections();
+            const profile = CANDIDATE_PROFILES[currentProfileId];
+
+            let html = '';
+
+            sections.forEach(sec => {
+                // Calcula progresso desta seção
+                let secTotalChecks = sec.topics.length * 3;
+                let secDoneChecks = 0;
+
+                sec.topics.forEach(t => {
+                    const st = userProgress.topics[t.id] || {};
+                    if (st.teoria) secDoneChecks++;
+                    if (st.revisao) secDoneChecks++;
+                    if (st.questoes) secDoneChecks++;
+                });
+
+                const secPct = secTotalChecks > 0 ? Math.round((secDoneChecks / secTotalChecks) * 100) : 0;
+
+                // Filtra tópicos por busca e status
+                const filteredTopics = sec.topics.filter(t => {
+                    const st = userProgress.topics[t.id] || {};
+                    const checksCount = (st.teoria ? 1 : 0) + (st.revisao ? 1 : 0) + (st.questoes ? 1 : 0);
+
+                    if (searchQuery && !t.title.toLowerCase().includes(searchQuery) && !(st.note || '').toLowerCase().includes(searchQuery)) {
+                        return false;
+                    }
+                    if (currentFilterStatus === 'pending' && checksCount !== 0) return false;
+                    if (currentFilterStatus === 'progress' && (checksCount === 0 || checksCount === 3)) return false;
+                    if (currentFilterStatus === 'done' && checksCount !== 3) return false;
+                    return true;
+                });
+
+                if (filteredTopics.length === 0) return;
+
+                html += `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm overflow-hidden">
+                        <!-- Cabeçalho da Disciplina -->
+                        <div class="bg-slate-50/80 dark:bg-slate-800/50 px-4 sm:px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">${sec.title}</h3>
+                                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${sec.badgeColor}">${sec.badge}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 sm:w-48 shrink-0">
+                                <div class="flex-1 h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: ${secPct}%"></div>
+                                </div>
+                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 w-10 text-right">${secPct}%</span>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Tópicos Verticalizados -->
+                        <div class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                            ${filteredTopics.map(topic => renderTopicRow(topic, profile)).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            if (!html) {
+                html = `
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-10 text-center border border-slate-200 dark:border-slate-800">
+                        <i class="ph-duotone ph-magnifying-glass text-4xl text-slate-400 mb-2"></i>
+                        <p class="font-display font-bold text-base text-slate-700 dark:text-slate-300">Nenhum tópico encontrado com esse filtro</p>
+                        <button onclick="resetFilters()" class="mt-3 text-xs font-semibold text-blue-600 hover:underline">Limpar filtros e mostrar todo o edital</button>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderTopicRow(topic, profile) {
+            const st = userProgress.topics[topic.id] || { teoria: false, revisao: false, questoes: false, qTotal: 0, qHits: 0, note: '' };
+            const allDone = st.teoria && st.revisao && st.questoes;
+            const hasNote = st.note && st.note.trim().length > 0;
+            const qAcc = st.qTotal > 0 ? Math.round((st.qHits / st.qTotal) * 100) : null;
+
+            const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(topic.query)}`;
+
+            return `
+                <div class="topic-row p-4 sm:px-6 ${allDone ? 'bg-emerald-50/40 dark:bg-emerald-950/15' : 'hover:bg-slate-50/70 dark:hover:bg-slate-800/30'}">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                        
+                        <!-- Título do Tópico -->
+                        <div class="flex-1 pr-2">
+                            <div class="flex items-start gap-2.5">
+                                <div class="mt-0.5 shrink-0">
+                                    ${allDone 
+                                        ? '<span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-xs"><i class="ph-bold ph-check"></i></span>' 
+                                        : '<span class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center text-[10px] text-slate-400"></span>'
+                                    }
+                                </div>
+                                <div>
+                                    <p class="text-xs sm:text-sm font-medium leading-snug ${allDone ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}">
+                                        ${topic.title}
+                                    </p>
+                                    
+                                    <!-- Sub-barra com Contador de Questões Feitas e Nota Rápida -->
+                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-slate-500 dark:text-slate-400">
+                                        <button onclick="toggleNoteBox('${topic.id}')" class="hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 font-medium">
+                                            <i class="ph-bold ph-note-pencil"></i>
+                                            <span>${hasNote ? 'Ver/Editar Anotação' : '+ Anotar resumo/dúvida'}</span>
+                                        </button>
+
+                                        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-200/70 dark:border-slate-700">
+                                            <span>Questões:</span>
+                                            <button onclick="adjustQuestionCount('${topic.id}', 'hit')" class="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 px-1 rounded font-bold" title="Registrar +1 questão certa">+Acerto</button>
+                                            <button onclick="adjustQuestionCount('${topic.id}', 'miss')" class="text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 px-1 rounded font-bold" title="Registrar +1 questão errada">+Erro</button>
+                                            <span class="font-bold text-slate-700 dark:text-slate-200 ml-0.5">${st.qHits || 0}/${st.qTotal || 0}</span>
+                                            ${qAcc !== null ? `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${qAcc >= 70 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'}">${qAcc}%</span>` : ''}
+                                            ${st.qTotal > 0 ? `<button onclick="adjustQuestionCount('${topic.id}', 'reset')" class="text-slate-400 hover:text-slate-600 ml-0.5" title="Zerar contador deste tópico"><i class="ph ph-arrow-counter-clockwise"></i></button>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Controles Direitos: 3 Checkboxes + 2 Botões de Estudo (YouTube e Questões) -->
+                        <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800/60 shrink-0">
+                            
+                            <!-- Os 3 Checkboxes de Progresso -->
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="toggleTopicCheck('${topic.id}', 'teoria')" class="check-pill px-2.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
+                                    st.teoria 
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
+                                    : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                                }">
+                                    <i class="ph-bold ${st.teoria ? 'ph-check-square' : 'ph-square'}"></i>
+                                    <span>Teoria</span>
+                                </button>
+
+                                <button onclick="toggleTopicCheck('${topic.id}', 'revisao')" class="check-pill px-2.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
+                                    st.revisao 
+                                    ? 'bg-amber-500 text-white border-amber-500 shadow-xs' 
+                                    : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                                }">
+                                    <i class="ph-bold ${st.revisao ? 'ph-check-square' : 'ph-square'}"></i>
+                                    <span>Revisão</span>
+                                </button>
+
+                                <button onclick="toggleTopicCheck('${topic.id}', 'questoes')" class="check-pill px-2.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
+                                    st.questoes 
+                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
+                                    : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+                                }">
+                                    <i class="ph-bold ${st.questoes ? 'ph-check-square' : 'ph-square'}"></i>
+                                    <span>Questões</span>
+                                </button>
+                            </div>
+
+                            <!-- Links Externos: Vídeo-aula (YouTube) e Treino de Questões -->
+                            <div class="flex items-center gap-1.5">
+                                <a href="${youtubeUrl}" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900/70 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/70 flex items-center gap-1 transition" title="Buscar vídeo-aula deste assunto no YouTube">
+                                    <i class="ph-fill ph-youtube-logo text-sm text-rose-600 dark:text-rose-400"></i>
+                                    <span class="hidden sm:inline">Aula</span>
+                                </a>
+
+                                <button onclick="openTopicQuestions('${topic.query.replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/70 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/70 flex items-center gap-1 transition" title="Fazer questões deste assunto no ${profile.questionPlatformName}">
+                                    <i class="ph-bold ph-exam text-sm"></i>
+                                    <span>Treinar</span>
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Caixa Expansível de Anotação Pessoal do Tópico -->
+                    <div id="note-box-${topic.id}" class="${hasNote ? '' : 'hidden'} mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/70">
+                        <div class="flex items-start gap-2">
+                            <i class="ph-fill ph-push-pin text-amber-500 mt-2"></i>
+                            <textarea oninput="saveTopicNote('${topic.id}', this.value)" rows="2" placeholder="Escreva aqui seu resumo rápido, artigos de lei ou pontos para não esquecer neste tópico..." class="w-full text-xs p-2.5 rounded-xl bg-amber-50/50 dark:bg-slate-800/90 border border-amber-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400">${st.note || ''}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // =================================================================
+        // INTERAÇÕES DO CHECKLIST (MARCAR, CONTAR QUESTÕES, ABRIR LINKS)
+        // =================================================================
+        function toggleTopicCheck(topicId, field) {
+            if (!userProgress.topics[topicId]) {
+                userProgress.topics[topicId] = { teoria: false, revisao: false, questoes: false, qTotal: 0, qHits: 0, note: '' };
+            }
+            userProgress.topics[topicId][field] = !userProgress.topics[topicId][field];
+            saveUserProgress();
+            renderSyllabus();
+        }
+
+        function adjustQuestionCount(topicId, action) {
+            if (!userProgress.topics[topicId]) {
+                userProgress.topics[topicId] = { teoria: false, revisao: false, questoes: false, qTotal: 0, qHits: 0, note: '' };
+            }
+            const item = userProgress.topics[topicId];
+            if (action === 'hit') {
+                item.qTotal = (item.qTotal || 0) + 1;
+                item.qHits = (item.qHits || 0) + 1;
+                item.questoes = true;
+            } else if (action === 'miss') {
+                item.qTotal = (item.qTotal || 0) + 1;
+                item.questoes = true;
+            } else if (action === 'reset') {
+                item.qTotal = 0;
+                item.qHits = 0;
+            }
+            saveUserProgress();
+            renderSyllabus();
+        }
+
+        function toggleNoteBox(topicId) {
+            const box = document.getElementById(`note-box-${topicId}`);
+            if (box) box.classList.toggle('hidden');
+        }
+
+        function saveTopicNote(topicId, val) {
+            if (!userProgress.topics[topicId]) {
+                userProgress.topics[topicId] = { teoria: false, revisao: false, questoes: false, qTotal: 0, qHits: 0, note: '' };
+            }
+            userProgress.topics[topicId].note = val;
+            localStorage.setItem(getStorageKey(), JSON.stringify(userProgress));
+        }
+
+        function openTopicQuestions(rawQuery) {
+            const profile = CANDIDATE_PROFILES[currentProfileId];
+            // Limpa a palavra "Concurso" do final para busca mais precisa em bancos de questões
+            const cleanTerm = rawQuery.replace(/\bConcurso\b/gi, '').trim();
+
+            if (profile.questionPlatformType === 'qconcursos') {
+                const url = `https://www.qconcursos.com/questoes-de-concursos/questoes?q=${encodeURIComponent(cleanTerm)}`;
+                window.open(url, '_blank', 'noopener');
+            } else {
+                // Copia o tema para a área de transferência para facilitar colar na busca do Estude Grátis
+                copyToClipboard(cleanTerm);
+                showToast(`Tema "${cleanTerm}" copiado! Cole na barra de pesquisa do Estude Grátis.`, 'success');
+                setTimeout(() => {
+                    window.open('https://www.estudegratis.com.br/questoes-de-concurso', '_blank', 'noopener');
+                }, 350);
+            }
+        }
+
+        // =================================================================
+        // CÁLCULO DE ESTATÍSTICAS EM TEMPO REAL
+        // =================================================================
+        function updateDashboardStats() {
+            const sections = getMergedSections();
+            let totalTopics = 0;
+            let countTeoria = 0;
+            let countRevisao = 0;
+            let countQuestoes = 0;
+            let totalQuestionsSolved = 0;
+            let totalQuestionsHits = 0;
+
+            sections.forEach(sec => {
+                sec.topics.forEach(t => {
+                    totalTopics++;
+                    const st = userProgress.topics[t.id] || {};
+                    if (st.teoria) countTeoria++;
+                    if (st.revisao) countRevisao++;
+                    if (st.questoes) countQuestoes++;
+                    totalQuestionsSolved += (st.qTotal || 0);
+                    totalQuestionsHits += (st.qHits || 0);
+                });
+            });
+
+            const totalPossibleChecks = totalTopics * 3;
+            const totalDoneChecks = countTeoria + countRevisao + countQuestoes;
+            const overallPct = totalPossibleChecks > 0 ? Math.round((totalDoneChecks / totalPossibleChecks) * 100) : 0;
+
+            const pctTeoria = totalTopics > 0 ? Math.round((countTeoria / totalTopics) * 100) : 0;
+            const pctRevisao = totalTopics > 0 ? Math.round((countRevisao / totalTopics) * 100) : 0;
+            const pctQuestoes = totalTopics > 0 ? Math.round((countQuestoes / totalTopics) * 100) : 0;
+            const pctAccuracy = totalQuestionsSolved > 0 ? Math.round((totalQuestionsHits / totalQuestionsSolved) * 100) : null;
+
+            document.getElementById('overall-pct-text').textContent = `${overallPct}%`;
+            document.getElementById('overall-items-count').textContent = `${totalDoneChecks} de ${totalPossibleChecks} etapas concluídas`;
+            document.getElementById('overall-progress-bar').style.width = `${overallPct}%`;
+
+            document.getElementById('stat-teoria-pct').textContent = `${pctTeoria}%`;
+            document.getElementById('stat-teoria-count').textContent = `${countTeoria}/${totalTopics} tópicos`;
+
+            document.getElementById('stat-revisao-pct').textContent = `${pctRevisao}%`;
+            document.getElementById('stat-revisao-count').textContent = `${countRevisao}/${totalTopics} tópicos`;
+
+            document.getElementById('stat-questoes-pct').textContent = `${pctQuestoes}%`;
+            document.getElementById('stat-questoes-count').textContent = `${countQuestoes}/${totalTopics} tópicos`;
+
+            document.getElementById('stat-acertos-pct').textContent = pctAccuracy !== null ? `${pctAccuracy}%` : '--%';
+            document.getElementById('stat-acertos-count').textContent = `${totalQuestionsHits} acertos / ${totalQuestionsSolved} feitas`;
+
+            document.getElementById('erros-count-badge').textContent = (userProgress.flashcards || []).length;
+        }
+
+        // =================================================================
+        // ABA 2: GUIA PERSONALIZADO DE ESTUDO POR CANDIDATO
+        // =================================================================
+        function renderCandidateStrategyGuide() {
+            const box = document.getElementById('custom-candidate-strategy-guide');
+            const p = CANDIDATE_PROFILES[currentProfileId];
+
+            if (p.id === 'cris') {
+                box.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-purple-600 dark:text-purple-400">Plano Tático • Contagem/MG (Banca IBGP)</span>
+                            <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5">Estratégia para Auditor de Controle Interno - Direito (Código 506)</h3>
+                        </div>
+                        <span class="text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-800">
+                            Linha de Corte Discursiva: 20 Ampla | 17 Negros | 20 PcD
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        <div class="space-y-2">
+                            <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <i class="ph-fill ph-scales text-purple-500"></i> 1. Como a Banca IBGP Cobra Direito e Legislação
+                            </h4>
+                            <p>A banca IBGP cobra fortemente a <strong>literalidade da lei seca</strong> combinada com jurisprudência consolidada (Súmulas do STF/STJ) nas questões objetivas. Dê atenção especial à <strong>Lei Complementar Municipal nº 255/2018</strong> (que estrutura o Sistema de Controle Interno de Contagem), à <strong>Lei nº 14.133/2021</strong> (especialmente os arts. 169 a 173 sobre controle das contratações), à <strong>LRF (LC 101/2000)</strong> e à <strong>Lei nº 8.429/1992 reformada</strong>.</p>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <i class="ph-fill ph-pencil-line text-rose-500"></i> 2. Como Gabaritar as 2 Discursivas em 10 Linhas (Item 9.4.3 do Edital)
+                            </h4>
+                            <p>Você terá <strong>máximo de 10 linhas para cada estudo de caso</strong> (15 pontos cada = 30 pontos). Como o espaço é curtíssimo, não faça introduções históricas! Use o modelo de 3 períodos:</p>
+                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                <li><strong>Linhas 1 a 3 (Conclusão Direta + Fundamento Legal):</strong> Responda diretamente se o ato do caso é regular ou irregular citando o artigo/lei ou princípio aplicável (vale 6,0 pts de Conteúdo).</li>
+                                <li><strong>Linhas 4 a 7 (Desenvolvimento Técnico):</strong> Explique a consequência jurídica e a jurisprudência ou regra de controle aplicável (vale 3,0 pts de Argumentação + 3,0 pts de Estrutura Lógica).</li>
+                                <li><strong>Linhas 8 a 10 (Providência do Controle Interno):</strong> Indique a medida cabível pelo Auditor (ex: recomendar anulação, instaurar TCE, cientificar o Prefeito/TCE-MG).</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            } else if (p.id === 'biel' || p.id === 'alice' || p.id === 'natalice') {
+                box.innerHTML = `
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                        <div>
+                            <span class="text-xs font-bold uppercase text-blue-600 dark:text-blue-400">Plano Tático • Inhapim/MG (Banca Fronte Concursos)</span>
+                            <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5">Como Garantir sua Vaga em Inhapim (${p.name})</h3>
+                        </div>
+                        <span class="text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                            Prova de 30 Questões (A, B, C, D) • 3 Horas de Duração
+                        </span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                        <div class="space-y-2">
+                            <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <i class="ph-fill ph-star text-amber-500"></i> 1. A Regra dos 75% (Conhecimentos Específicos)
+                            </h4>
+                            <p>No concurso de Inhapim, <strong>Conhecimentos Específicos tem 20 questões</strong> e cada questão certa vale <strong>3,75 pontos</strong> (totalizando 75 dos 100 pontos da prova!). Além disso, em caso de empate, passa quem acertar mais em Conhecimentos Específicos. Dedique <strong>70% do seu tempo de estudo</strong> para dominar todos os tópicos da Parte I do seu checklist!</p>
+                        </div>
+                        <div class="space-y-2">
+                            <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                                <i class="ph-fill ph-shield-warning text-rose-500"></i> 2. Cuidado com a Eliminação por Zerar Matéria!
+                            </h4>
+                            <p>O item 8.3 do edital diz que <strong>quem zerar Português ou Matemática é eliminado do concurso</strong>, mesmo que gabarite a parte específica! São apenas 5 questões de Português e 5 de Matemática. Comece estudando os tópicos mais fáceis e que sempre caem: <em>Interpretação de Texto, Acentuação e Crase</em> em Português; e <em>Porcentagem, Regra de Três e Sistema de Medidas/Monetário</em> em Matemática.</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                box.innerHTML = `
+                    <div>
+                        <span class="text-xs font-bold uppercase text-blue-600 dark:text-blue-400">Plano de Revisão • Contador Contagem/MG</span>
+                        <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5">Foco em Questões Comentadas IBGP + MCASP/LRF</h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2">Resolva baterias de questões da banca IBGP no Qconcursos filtrando por Contabilidade Aplicada ao Setor Público, AFO e Contabilidade Geral para pegar o ritmo da banca rapidamente.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // =================================================================
+        // ABA 3: CADERNO DE ERROS & FLASHCARDS (COM EXPORTAÇÃO ANKI)
+        // =================================================================
+        function renderFlashcards() {
+            const container = document.getElementById('flashcards-list-container');
+            const cards = userProgress.flashcards || [];
+
+            if (cards.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700">
+                        <i class="ph-duotone ph-cards text-3xl text-slate-400"></i>
+                        <p class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mt-2">Seu Caderno de Erros ainda está vazio</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Adicione uma questão que você errou no formulário ao lado ou clique abaixo para carregar exemplos prontos do seu cargo!</p>
+                        <button onclick="loadSampleFlashcards()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition">
+                            Carregar Cartões de Exemplo para ${CANDIDATE_PROFILES[currentProfileId].name}
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cards.map((c, idx) => `
+                <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 transition">
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                            ${c.discipline}
+                        </span>
+                        <button onclick="deleteFlashcard(${idx})" class="text-slate-400 hover:text-rose-500 text-xs flex items-center gap-1">
+                            <i class="ph-bold ph-trash"></i> Excluir
+                        </button>
+                    </div>
+                    <div class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                        <span class="text-blue-600 dark:text-blue-400">Pergunta:</span> ${c.front}
+                    </div>
+                    <div id="fc-answer-${idx}" class="hidden mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/30 p-2.5 rounded-lg">
+                        <span class="font-bold">Resposta:</span> ${c.back}
+                    </div>
+                    <button onclick="toggleFlashcardAnswer(${idx})" class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1">
+                        <i class="ph-bold ph-eye"></i> Mostrar / Ocultar Resposta
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addFlashcard(e) {
+            e.preventDefault();
+            const discipline = document.getElementById('fc-discipline').value;
+            const front = document.getElementById('fc-front').value.trim();
+            const back = document.getElementById('fc-back').value.trim();
+            if (!front || !back) return;
+
+            userProgress.flashcards.unshift({ discipline, front, back, createdAt: new Date().toISOString() });
+            saveUserProgress();
+            renderFlashcards();
+
+            document.getElementById('fc-front').value = '';
+            document.getElementById('fc-back').value = '';
+            showToast('Cartão salvo no Caderno de Erros!', 'success');
+        }
+
+        function toggleFlashcardAnswer(idx) {
+            const el = document.getElementById(`fc-answer-${idx}`);
+            if (el) el.classList.toggle('hidden');
+        }
+
+        function deleteFlashcard(idx) {
+            userProgress.flashcards.splice(idx, 1);
+            saveUserProgress();
+            renderFlashcards();
+            showToast('Cartão removido.', 'info');
+        }
+
+        function loadSampleFlashcards() {
+            const samples = CANDIDATE_PROFILES[currentProfileId].sampleFlashcards || [];
+            samples.forEach(s => {
+                const exists = userProgress.flashcards.some(f => f.front === s.front);
+                if (!exists) userProgress.flashcards.push({ ...s });
+            });
+            saveUserProgress();
+            renderFlashcards();
+            showToast('Cartões de exemplo carregados com sucesso!', 'success');
+        }
+
+        function exportAnkiTSV() {
+            const cards = userProgress.flashcards || [];
+            if (cards.length === 0) {
+                showToast('Cadastre pelo menos 1 cartão antes de exportar para o Anki!', 'warning');
+                return;
+            }
+            // Formato padrão do Anki separado por Ponto e Vírgula (Frente;Verso;Tag)
+            const lines = cards.map(c => {
+                const cleanFront = c.front.replace(/[\r\n;]+/g, ' ');
+                const cleanBack = c.back.replace(/[\r\n;]+/g, ' ');
+                const tag = c.discipline.replace(/\s+/g, '_');
+                return `${cleanFront};${cleanBack};${tag}`;
+            });
+            const content = lines.join('\n');
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `anki-flashcards-${currentProfileId}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Arquivo para Anki baixado! No Anki, clique em Arquivo > Importar.', 'success');
+        }
+
+        // =================================================================
+        // ABA 4: BACKUP JSON, LINKS DIRETOS E NOVOS TÓPICOS
+        // =================================================================
+        function exportBackupJSON() {
+            const data = {
+                profileId: currentProfileId,
+                exportedAt: new Date().toISOString(),
+                progress: userProgress
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-estudos-${currentProfileId}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Backup baixado com sucesso!', 'success');
+        }
+
+        function importBackupJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed && parsed.progress && parsed.progress.topics) {
+                        if (parsed.profileId && parsed.profileId !== FIXED_PROFILE_ID) { showToast('Este backup pertence a outro perfil.', 'warning'); event.target.value = ''; return; }
+                        currentProfileId = FIXED_PROFILE_ID;
+                        userProgress = parsed.progress;
+                        saveUserProgress();
+                        
+                        applyCurrentProfile();
+                        showToast('Progresso restaurado com sucesso!', 'success');
+                    } else {
+                        showToast('Arquivo inválido. Selecione um arquivo .json gerado por este site.', 'warning');
+                    }
+                } catch (err) {
+                    showToast('Erro ao ler o arquivo de backup.', 'warning');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function openAddTopicModal() {
+            const select = document.getElementById('custom-topic-section');
+            const sections = CANDIDATE_PROFILES[currentProfileId].sections;
+            select.innerHTML = sections.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
+            document.getElementById('add-topic-modal').classList.remove('hidden');
+        }
+
+        function closeAddTopicModal() {
+            document.getElementById('add-topic-modal').classList.add('hidden');
+        }
+
+        function saveCustomTopic(e) {
+            e.preventDefault();
+            const sectionId = document.getElementById('custom-topic-section').value;
+            const title = document.getElementById('custom-topic-title').value.trim();
+            const query = document.getElementById('custom-topic-query').value.trim() || `${title} Concurso`;
+            if (!title) return;
+
+            const newTopic = {
+                id: `${currentProfileId}-custom-${Date.now()}`,
+                sectionId,
+                title,
+                query
+            };
+            userProgress.customTopics.push(newTopic);
+            saveUserProgress();
+            renderSyllabus();
+            closeAddTopicModal();
+            document.getElementById('custom-topic-title').value = '';
+            document.getElementById('custom-topic-query').value = '';
+            showToast('Novo tópico adicionado ao seu edital verticalizado!', 'success');
+        }
+
+        // =================================================================
+        // NAVEGAÇÃO ENTRE ABAS, FILTROS, TEMA E UTILITÁRIOS
+        // =================================================================
+        function switchTab(tabId) {
+            currentTab = tabId;
+            ['edital', 'guia', 'erros', 'backup'].forEach(t => {
+                const content = document.getElementById(`tab-content-${t}`);
+                const btn = document.getElementById(`tab-btn-${t}`);
+                if (t === tabId) {
+                    content.classList.remove('hidden');
+                    btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap bg-blue-600 text-white shadow-xs transition';
+                } else {
+                    content.classList.add('hidden');
+                    btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+                }
+            });
+        }
+
+        function setFilterStatus(status) {
+            currentFilterStatus = status;
+            renderSyllabus();
+        }
+
+        function clearSearch() {
+            document.getElementById('topic-search-input').value = '';
+            renderSyllabus();
+        }
+
+        function resetFilters() {
+            document.getElementById('topic-search-input').value = '';
+            currentFilterStatus = 'all';
+            renderSyllabus();
+        }
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('portal_concursos_theme');
+            const useDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (useDark) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = 'ph-duotone ph-sun text-lg text-amber-400';
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('portal_concursos_theme', isDark ? 'dark' : 'light');
+            document.getElementById('theme-icon').className = isDark 
+                ? 'ph-duotone ph-sun text-lg text-amber-400' 
+                : 'ph-duotone ph-moon text-lg';
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {}
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-emerald-600 text-white border-emerald-500',
+                info: 'bg-slate-900 text-white border-slate-700',
+                warning: 'bg-amber-600 text-white border-amber-500'
+            };
+            const icons = {
+                success: 'ph-check-circle',
+                info: 'ph-info',
+                warning: 'ph-warning'
+            };
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg border text-xs sm:text-sm font-medium transition-all duration-300 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<i class="ph-fill ${icons[type] || icons.info} text-lg shrink-0"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
