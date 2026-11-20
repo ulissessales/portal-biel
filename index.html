@@ -2,7 +2,9 @@
 <html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
     <title>Portal de Estudos | Biel</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -38,7 +40,32 @@
     </script>
 
     <style>
-        /* Custom Scrollbar & Checkboxes */
+        /* Mobile Ergonomics, Safe Areas & Custom Scrollbar */
+        html, body {
+            overflow-x: clip;
+            -webkit-text-size-adjust: 100%;
+        }
+        button, a, select, input, textarea, label {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        /* Evita zoom automático no iOS Safari ao focar campos */
+        @media (max-width: 639px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .safe-bottom {
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+        }
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.04); }
         ::-webkit-scrollbar-thumb { background: rgba(100,116,139,0.4); border-radius: 9999px; }
@@ -49,10 +76,16 @@
             user-select: none;
         }
         .check-pill:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
         .topic-row {
             transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .accordion-chevron {
+            transition: transform 0.2s ease;
+        }
+        .accordion-chevron.collapsed {
+            transform: rotate(-90deg);
         }
         @keyframes pulse-subtle {
             0%, 100% { opacity: 1; }
@@ -72,71 +105,78 @@
     
 
     <!-- CABEÇALHO PRINCIPAL DO CANDIDATO -->
-    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 lg:sticky lg:top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-3.5 sm:px-6 py-3.5 sm:py-4">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5 lg:gap-4">
                 
-                <!-- Identificação do Candidato & Cargo -->
-                <div class="flex items-start sm:items-center gap-3.5">
-                    <div id="candidate-avatar" class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl sm:text-2xl shadow-md shrink-0">
-                        B
-                    </div>
-                    <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <h1 id="candidate-title" class="font-display font-extrabold text-lg sm:text-2xl text-slate-900 dark:text-white tracking-tight">
-                                Carregando...
-                            </h1>
-                            <span id="candidate-badge-banca" class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                Banca
-                            </span>
+                <!-- Identificação do Candidato & Cargo (+ Botão Tema no Mobile) -->
+                <div class="flex items-start sm:items-center justify-between gap-3">
+                    <div class="flex items-start sm:items-center gap-3 min-w-0">
+                        <div id="candidate-avatar" class="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-lg sm:text-2xl shadow-md shrink-0">
+                            B
                         </div>
-                        <p id="candidate-subtitle" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5">
-                            Cargo e Edital
-                        </p>
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <h1 id="candidate-title" class="font-display font-extrabold text-base sm:text-2xl text-slate-900 dark:text-white tracking-tight leading-tight">
+                                    Carregando...
+                                </h1>
+                                <span id="candidate-badge-banca" class="text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                    Banca
+                                </span>
+                            </div>
+                            <p id="candidate-subtitle" class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-0.5 leading-snug break-words">
+                                Cargo e Edital
+                            </p>
+                        </div>
                     </div>
+
+                    <!-- Botão Modo Escuro (Mobile topo direito) -->
+                    <button onclick="toggleDarkMode()" class="lg:hidden p-2.5 min-w-[42px] min-h-[42px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700 shrink-0" title="Alternar Tema Claro/Escuro" aria-label="Alternar Tema Claro/Escuro">
+                        <i class="theme-icon-el ph-duotone ph-moon text-lg"></i>
+                    </button>
                 </div>
 
                 <!-- Contagem Regressiva & Ações Rápidas -->
-                <div class="flex flex-wrap items-center justify-between sm:justify-end gap-3 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
+                <div class="grid grid-cols-1 sm:flex sm:flex-wrap items-stretch sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-2.5 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
                     <!-- Contador de Dias até a Prova -->
-                    <div class="flex items-center gap-2.5 bg-slate-100 dark:bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-200/80 dark:border-slate-700">
-                        <i class="ph-duotone ph-calendar-check text-2xl text-blue-600 dark:text-blue-400"></i>
-                        <div>
-                            <div class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400" id="exam-date-label">PROVA: 17/01/2027</div>
-                            <div class="font-display font-bold text-sm sm:text-base text-slate-900 dark:text-white" id="exam-countdown-text">Calculando...</div>
+                    <div class="flex items-center gap-2.5 bg-slate-100 dark:bg-slate-800/90 px-3.5 py-2.5 sm:py-2 rounded-xl border border-slate-200/80 dark:border-slate-700">
+                        <i class="ph-duotone ph-calendar-check text-2xl text-blue-600 dark:text-blue-400 shrink-0"></i>
+                        <div class="min-w-0">
+                            <div class="text-[11px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 leading-tight" id="exam-date-label">PROVA: 17/01/2027</div>
+                            <div class="font-display font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight mt-0.5" id="exam-countdown-text">Calculando...</div>
                         </div>
                     </div>
 
                     <!-- Link Direto Plataforma de Questões -->
-                    <a id="header-questions-btn" href="#" target="_blank" rel="noopener" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-3.5 py-2.5 rounded-xl flex items-center gap-2 shadow-sm transition">
-                        <i class="ph-bold ph-check-square-offset text-lg"></i>
+                    <a id="header-questions-btn" href="#" target="_blank" rel="noopener" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2.5 min-h-[44px] rounded-xl flex items-center justify-center gap-2 shadow-sm transition">
+                        <i class="ph-bold ph-check-square-offset text-lg shrink-0"></i>
                         <span id="header-questions-label">Banco de Questões</span>
-                        <i class="ph-bold ph-arrow-square-out text-xs opacity-80"></i>
+                        <i class="ph-bold ph-arrow-square-out text-xs opacity-80 shrink-0"></i>
                     </a>
 
-                    <!-- Botão Modo Escuro -->
-                    <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700" title="Alternar Tema Claro/Escuro">
-                        <i id="theme-icon" class="ph-duotone ph-moon text-lg"></i>
+                    <!-- Botão Modo Escuro (Desktop) -->
+                    <button onclick="toggleDarkMode()" class="hidden lg:flex items-center justify-center p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition border border-slate-200 dark:border-slate-700" title="Alternar Tema Claro/Escuro" aria-label="Alternar Tema Claro/Escuro">
+                        <i id="theme-icon" class="theme-icon-el ph-duotone ph-moon text-lg"></i>
                     </button>
                 </div>
             </div>
 
-            <!-- NAVEGAÇÃO DE ABAS DO PORTAL -->
-            <nav class="flex items-center gap-1 sm:gap-2 mt-4 pt-2 border-t border-slate-100 dark:border-slate-800/80 overflow-x-auto no-scrollbar">
-                <button onclick="switchTab('edital')" id="tab-btn-edital" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+            <!-- NAVEGAÇÃO DE ABAS DO PORTAL (Desktop) -->
+            <nav class="hidden lg:flex items-center gap-2 mt-4 pt-2 border-t border-slate-100 dark:border-slate-800/80 overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('edital')" id="tab-btn-edital" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap transition">
                     <i class="ph-duotone ph-list-checks text-lg"></i>
                     <span>1. Edital Verticalizado</span>
                 </button>
-                <button onclick="switchTab('guia')" id="tab-btn-guia" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+                <button onclick="switchTab('guia')" id="tab-btn-guia" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap transition">
                     <i class="ph-duotone ph-compass-tool text-lg"></i>
                     <span>2. Como Estudar & Usar o Anki</span>
                 </button>
-                <button onclick="switchTab('erros')" id="tab-btn-erros" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+                <button onclick="switchTab('erros')" id="tab-btn-erros" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap transition">
                     <i class="ph-duotone ph-notebook text-lg"></i>
                     <span>3. Caderno de Erros & Flashcards</span>
-                    <span id="erros-count-badge" class="px-1.5 py-0.2 text-[11px] rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">0</span>
+                    <span id="erros-count-badge" class="px-1.5 py-0.5 text-[11px] rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold">0</span>
                 </button>
-                <button onclick="switchTab('backup')" id="tab-btn-backup" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap transition">
+                <button onclick="switchTab('backup')" id="tab-btn-backup" class="tab-btn px-3.5 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap transition">
                     <i class="ph-duotone ph-cloud-arrow-up text-lg"></i>
                     <span>4. Salvar / Backup & Customizar</span>
                 </button>
@@ -145,78 +185,78 @@
     </header>
 
     <!-- CONTEÚDO PRINCIPAL -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <main class="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
 
         <!-- RESUMO DE PROGRESSO E FICHA ESTRATÉGICA DO CARGO -->
-        <section class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4">
             
             <!-- Card de Progresso Geral e Pilares (7 colunas) -->
-            <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+            <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between">
                 <div>
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <div>
+                    <div class="flex items-start sm:items-center justify-between gap-2 mb-3">
+                        <div class="min-w-0">
                             <h2 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
-                                <i class="ph-fill ph-chart-polar text-blue-600 dark:text-blue-400"></i>
-                                Seu Progresso no Edital
+                                <i class="ph-fill ph-chart-polar text-blue-600 dark:text-blue-400 shrink-0"></i>
+                                <span>Seu Progresso no Edital</span>
                             </h2>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Tudo o que você marca fica salvo automaticamente neste aparelho.</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tudo o que você marca fica salvo automaticamente neste aparelho.</p>
                         </div>
-                        <div class="text-right">
-                            <span id="overall-pct-text" class="font-display font-extrabold text-2xl sm:text-3xl text-blue-600 dark:text-blue-400">0%</span>
-                            <span class="block text-[11px] text-slate-500 dark:text-slate-400 font-medium" id="overall-items-count">0 de 0 metas</span>
+                        <div class="text-right shrink-0">
+                            <span id="overall-pct-text" class="font-display font-extrabold text-2xl sm:text-3xl text-blue-600 dark:text-blue-400 leading-none">0%</span>
+                            <span class="block text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5" id="overall-items-count">0 de 0 metas</span>
                         </div>
                     </div>
 
                     <!-- Barra de Progresso Global -->
-                    <div class="w-full h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-700/60">
+                    <div class="w-full h-3 sm:h-3.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-slate-200/60 dark:border-slate-700/60">
                         <div id="overall-progress-bar" class="h-full bg-gradient-to-r from-blue-600 via-indigo-500 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
                     </div>
                 </div>
 
                 <!-- 4 Mini-Cards dos Pilares: Teoria, Revisão, Questões, Aproveitamento -->
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-5">
-                    <div class="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/60 rounded-xl p-3">
-                        <div class="flex items-center justify-between text-blue-700 dark:text-blue-300 text-xs font-semibold">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 mt-4 sm:mt-5">
+                    <div class="bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200/60 dark:border-blue-900/60 rounded-xl p-2.5 sm:p-3">
+                        <div class="flex items-center justify-between text-blue-700 dark:text-blue-300 text-xs font-semibold gap-1">
                             <span>1. Teoria</span>
-                            <i class="ph-bold ph-book-open-text"></i>
+                            <i class="ph-bold ph-book-open-text shrink-0"></i>
                         </div>
                         <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-teoria-pct">0%</div>
                         <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-teoria-count">0/0 tópicos</div>
                     </div>
 
-                    <div class="bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/60 rounded-xl p-3">
-                        <div class="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-semibold">
+                    <div class="bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-900/60 rounded-xl p-2.5 sm:p-3">
+                        <div class="flex items-center justify-between text-amber-700 dark:text-amber-300 text-xs font-semibold gap-1">
                             <span>2. Revisão/Anki</span>
-                            <i class="ph-bold ph-lightning"></i>
+                            <i class="ph-bold ph-lightning shrink-0"></i>
                         </div>
                         <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-revisao-pct">0%</div>
                         <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-revisao-count">0/0 tópicos</div>
                     </div>
 
-                    <div class="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/60 rounded-xl p-3">
-                        <div class="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-semibold">
+                    <div class="bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/60 dark:border-emerald-900/60 rounded-xl p-2.5 sm:p-3">
+                        <div class="flex items-center justify-between text-emerald-700 dark:text-emerald-300 text-xs font-semibold gap-1">
                             <span>3. Questões</span>
-                            <i class="ph-bold ph-check-circle"></i>
+                            <i class="ph-bold ph-check-circle shrink-0"></i>
                         </div>
                         <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-questoes-pct">0%</div>
                         <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-questoes-count">0/0 tópicos</div>
                     </div>
 
-                    <div class="bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900/60 rounded-xl p-3">
-                        <div class="flex items-center justify-between text-purple-700 dark:text-purple-300 text-xs font-semibold">
+                    <div class="bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200/60 dark:border-purple-900/60 rounded-xl p-2.5 sm:p-3">
+                        <div class="flex items-center justify-between text-purple-700 dark:text-purple-300 text-xs font-semibold gap-1">
                             <span>Desempenho</span>
-                            <i class="ph-bold ph-target"></i>
+                            <i class="ph-bold ph-target shrink-0"></i>
                         </div>
                         <div class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-1" id="stat-acertos-pct">--%</div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400" id="stat-acertos-count">0 acertos / 0 feitas</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight" id="stat-acertos-count">0 acertos / 0 feitas</div>
                     </div>
                 </div>
             </div>
 
             <!-- Card de Alerta Estratégico & Raio-X da Prova (5 colunas) -->
-            <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-900 dark:to-slate-950 text-white rounded-2xl p-5 border border-slate-700 shadow-sm flex flex-col justify-between">
+            <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-900 dark:to-slate-950 text-white rounded-2xl p-4 sm:p-5 border border-slate-700 shadow-sm flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between gap-2 mb-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
                         <span class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center gap-1">
                             <i class="ph-fill ph-warning-octagon"></i> Regra de Ouro do Edital
                         </span>
@@ -224,7 +264,7 @@
                             Salário & Vagas
                         </span>
                     </div>
-                    <h3 id="strategy-card-title" class="font-display font-bold text-base sm:text-lg text-white mt-1">
+                    <h3 id="strategy-card-title" class="font-display font-bold text-base sm:text-lg text-white mt-1 leading-snug">
                         Onde está a sua aprovação
                     </h3>
                     <p id="strategy-card-desc" class="text-xs sm:text-sm text-slate-300 mt-1.5 leading-relaxed">
@@ -233,7 +273,7 @@
                 </div>
 
                 <!-- Pesos por Matéria -->
-                <div id="discipline-weights-box" class="mt-4 pt-3 border-t border-slate-700/80 space-y-2">
+                <div id="discipline-weights-box" class="mt-4 pt-3 border-t border-slate-700/80 space-y-2.5">
                     <!-- Preenchido via JS -->
                 </div>
             </div>
@@ -243,50 +283,50 @@
         <!-- ================================================================= -->
         <!-- ABA 1: EDITAL VERTICALIZADO INTERATIVO                            -->
         <!-- ================================================================= -->
-        <section id="tab-content-edital" class="space-y-5">
+        <section id="tab-content-edital" class="space-y-4 sm:space-y-5">
             
             <!-- Barra de Filtros, Pesquisa e Legenda -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
                 
                 <!-- Campo de Busca -->
                 <div class="relative flex-1">
-                    <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="topic-search-input" oninput="renderSyllabus()" placeholder="Buscar assunto no edital (ex: Crase, Arquivística, EPI, Licitação, Porcentagem)..." class="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-slate-100">
-                    <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                        <i class="ph-bold ph-x-circle"></i>
+                    <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+                    <input type="text" id="topic-search-input" oninput="renderSyllabus()" placeholder="Buscar assunto no edital (ex: Crase, Arquivística, EPI, Licitação, Porcentagem)..." class="w-full pl-10 pr-10 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-800 dark:text-slate-100">
+                    <button onclick="clearSearch()" id="clear-search-btn" class="hidden absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-600" aria-label="Limpar busca">
+                        <i class="ph-bold ph-x-circle text-lg"></i>
                     </button>
                 </div>
 
                 <!-- Filtros de Status -->
-                <div class="flex flex-wrap items-center gap-1.5">
-                    <button onclick="setFilterStatus('all')" id="filter-btn-all" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-0.5 md:pb-0 md:flex-wrap">
+                    <button onclick="setFilterStatus('all')" id="filter-btn-all" class="filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold transition">
                         Todos
                     </button>
-                    <button onclick="setFilterStatus('pending')" id="filter-btn-pending" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                    <button onclick="setFilterStatus('pending')" id="filter-btn-pending" class="filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold transition">
                         Não Iniciados
                     </button>
-                    <button onclick="setFilterStatus('progress')" id="filter-btn-progress" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                    <button onclick="setFilterStatus('progress')" id="filter-btn-progress" class="filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold transition">
                         Em Estudo
                     </button>
-                    <button onclick="setFilterStatus('done')" id="filter-btn-done" class="filter-chip px-3 py-2 rounded-xl text-xs font-semibold transition">
+                    <button onclick="setFilterStatus('done')" id="filter-btn-done" class="filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold transition">
                         Concluídos (3/3)
                     </button>
                 </div>
             </div>
 
             <!-- Dica Rápida de Uso dos Botões -->
-            <div class="bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/70 rounded-xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-blue-900 dark:text-blue-200">
-                <div class="flex items-center gap-2">
-                    <i class="ph-fill ph-info text-blue-600 dark:text-blue-400 text-base shrink-0"></i>
+            <div class="bg-blue-50/90 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/70 rounded-xl px-3.5 sm:px-4 py-3 sm:py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-blue-900 dark:text-blue-200">
+                <div class="flex items-start sm:items-center gap-2 leading-relaxed">
+                    <i class="ph-fill ph-info text-blue-600 dark:text-blue-400 text-base shrink-0 mt-0.5 sm:mt-0"></i>
                     <span><strong>Dica prática:</strong> Clique em <span class="underline font-semibold">Vídeo-aula</span> para abrir aulas daquele assunto no YouTube, ou em <span class="underline font-semibold">Fazer Questões</span> para treinar o tópico agora mesmo!</span>
                 </div>
-                <button onclick="openAddTopicModal()" class="text-blue-700 dark:text-blue-300 hover:underline font-bold flex items-center gap-1 shrink-0">
-                    <i class="ph-bold ph-plus-circle"></i> Adicionar Tópico Extra
+                <button onclick="openAddTopicModal()" class="w-full sm:w-auto justify-center min-h-[38px] sm:min-h-0 px-3 py-1.5 sm:p-0 rounded-lg bg-blue-100/80 dark:bg-blue-900/50 sm:bg-transparent sm:dark:bg-transparent text-blue-700 dark:text-blue-300 hover:underline font-bold flex items-center gap-1.5 shrink-0">
+                    <i class="ph-bold ph-plus-circle text-sm"></i> Adicionar Tópico Extra
                 </button>
             </div>
 
             <!-- Container das Disciplinas e Tópicos Verticalizados -->
-            <div id="syllabus-container" class="space-y-6">
+            <div id="syllabus-container" class="space-y-4 sm:space-y-6">
                 <!-- Preenchido dinamicamente via JS -->
             </div>
 
@@ -295,71 +335,71 @@
         <!-- ================================================================= -->
         <!-- ABA 2: GUIA DE ESTUDOS, ESTRATÉGIA E COMO USAR O ANKI             -->
         <!-- ================================================================= -->
-        <section id="tab-content-guia" class="hidden space-y-6">
+        <section id="tab-content-guia" class="hidden space-y-4 sm:space-y-6">
             
             <!-- Bloco 1: Estratégia Específica para o Cargo do Candidato -->
-            <div id="custom-candidate-strategy-guide" class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div id="custom-candidate-strategy-guide" class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm">
                 <!-- Preenchido via JS conforme o perfil selecionado -->
             </div>
 
             <!-- Bloco 2: Método dos 3 Passos (Teoria Curta + Questões + Anki) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center font-display font-bold text-lg mb-3">
                         1
                     </div>
                     <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">Estudo Direto ao Ponto (Sem Enrolação)</h3>
-                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
                         Não tente decorar livros gigantes. Clique no botão <strong>"Vídeo-aula"</strong> ao lado do tópico no seu checklist, assista a uma aula focada de 15 a 30 minutos no YouTube anotando só as palavras-chave (prazos, proibições, conceitos) e marque a caixinha <strong>Teoria</strong>.
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-display font-bold text-lg mb-3">
                         2
                     </div>
                     <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">Estudo Reverso por Questões (O Segredo)</h3>
-                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
                         Quem passa em concurso é quem acerta bolinha no gabarito! Logo após ver a teoria (ou até antes, nas matérias fáceis), clique em <strong>"Questões"</strong>. Resolva de 10 a 20 questões do tema. Errou alguma? Veja o porquê e anote na aba <strong>Caderno de Erros</strong> aqui do site.
                     </p>
                 </div>
 
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
                     <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center font-display font-bold text-lg mb-3">
                         3
                     </div>
                     <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">Revisão Ativa com Anki (Nunca Mais Esqueça)</h3>
-                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
+                    <p class="text-sm text-slate-600 dark:text-slate-400 mt-2 leading-relaxed">
                         O cérebro esquece 70% do que leu em 7 dias se você não revisar. Em vez de reler caderno inteiro, transforme seus erros em cartões de pergunta e resposta no <strong>Anki</strong> (ou na aba 3 aqui do site) e revise 15 minutinhos por dia no celular!
                     </p>
                 </div>
             </div>
 
             <!-- Bloco 3: Tutorial Completo e Prático do ANKI -->
-            <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+            <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-4">
                     <div>
                         <span class="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Guia Passo a Passo</span>
-                        <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5 flex items-center gap-2">
-                            <i class="ph-fill ph-cards text-amber-500"></i>
-                            Como Usar o Anki do Jeito Certo (PC e Celular)
+                        <h3 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-0.5 flex items-center gap-2">
+                            <i class="ph-fill ph-cards text-amber-500 shrink-0"></i>
+                            <span>Como Usar o Anki do Jeito Certo (PC e Celular)</span>
                         </h3>
                     </div>
-                    <div class="flex flex-wrap gap-2">
-                        <a href="https://apps.ankiweb.net/" target="_blank" rel="noopener" class="text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
-                            <i class="ph-bold ph-desktop"></i> Baixar Anki PC (Grátis)
+                    <div class="grid grid-cols-1 sm:flex sm:flex-wrap gap-2">
+                        <a href="https://apps.ankiweb.net/" target="_blank" rel="noopener" class="text-xs sm:text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3.5 py-2.5 min-h-[42px] rounded-xl flex items-center justify-center sm:justify-start gap-1.5 transition">
+                            <i class="ph-bold ph-desktop text-base"></i> Baixar Anki PC (Grátis)
                         </a>
-                        <a href="https://play.google.com/store/apps/details?id=com.ichi2.anki" target="_blank" rel="noopener" class="text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
-                            <i class="ph-bold ph-android-logo"></i> AnkiDroid (Grátis)
+                        <a href="https://play.google.com/store/apps/details?id=com.ichi2.anki" target="_blank" rel="noopener" class="text-xs sm:text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:text-emerald-300 px-3.5 py-2.5 min-h-[42px] rounded-xl flex items-center justify-center sm:justify-start gap-1.5 transition">
+                            <i class="ph-bold ph-android-logo text-base"></i> AnkiDroid (Grátis)
                         </a>
-                        <a href="https://ankiweb.net/" target="_blank" rel="noopener" class="text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 px-3 py-2 rounded-xl flex items-center gap-1.5 transition">
-                            <i class="ph-bold ph-globe"></i> AnkiWeb (iPhone/Navegador)
+                        <a href="https://ankiweb.net/" target="_blank" rel="noopener" class="text-xs sm:text-xs font-semibold bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950/60 dark:text-blue-300 px-3.5 py-2.5 min-h-[42px] rounded-xl flex items-center justify-center sm:justify-start gap-1.5 transition">
+                            <i class="ph-bold ph-globe text-base"></i> AnkiWeb (iPhone/Navegador)
                         </a>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6">
+                    <div class="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                         <h4 class="font-display font-bold text-slate-900 dark:text-white text-base">O que é o Anki?</h4>
                         <p>
                             O Anki é um aplicativo gratuito de <strong>cartões de memória (flashcards)</strong> com repetição espaçada. Você coloca uma <strong>Pergunta na Frente</strong> e uma <strong>Resposta Curta no Verso</strong>.
@@ -369,9 +409,9 @@
                         </p>
                         <div class="bg-slate-50 dark:bg-slate-800/70 p-4 rounded-xl border border-slate-200 dark:border-slate-700 space-y-2">
                             <div class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <i class="ph-fill ph-check-fat text-emerald-500"></i> As 3 Regras para Criar Bons Cartões:
+                                <i class="ph-fill ph-check-fat text-emerald-500 shrink-0"></i> As 3 Regras para Criar Bons Cartões:
                             </div>
-                            <ul class="list-disc list-inside space-y-1 text-xs">
+                            <ul class="list-disc list-inside space-y-1.5 text-xs sm:text-sm">
                                 <li><strong>Regra 1 (Curto e Direto):</strong> Nunca copie uma página inteira no cartão. Cada cartão deve cobrar apenas 1 informação ou pegadinha.</li>
                                 <li><strong>Regra 2 (Crie a partir dos seus Erros):</strong> Só crie cartão daquilo que você errou em questão ou de listas/prazos fáceis de esquecer.</li>
                                 <li><strong>Regra 3 (Use a Aba 3 deste site!):</strong> Tudo o que você cadastrar na aba <em>"Caderno de Erros"</em> aqui do portal pode ser estudado como Flashcard na hora ou exportado em 1 clique para o Anki!</li>
@@ -385,7 +425,7 @@
                             <div class="text-xs font-bold text-rose-700 dark:text-rose-300 uppercase flex items-center gap-1.5">
                                 <i class="ph-fill ph-x-circle"></i> Jeito Errado (Cartão Gigante e Cansativo)
                             </div>
-                            <p class="text-xs text-slate-700 dark:text-slate-300 mt-1.5">
+                            <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 leading-relaxed">
                                 <strong>Frente:</strong> Fale tudo sobre limpeza concorrente, terminal e produtos químicos.<br>
                                 <strong>Verso:</strong> (Um texto enorme de 15 linhas que dá preguiça de ler e você nunca sabe se acertou tudo).
                             </p>
@@ -395,12 +435,12 @@
                             <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 uppercase flex items-center gap-1.5">
                                 <i class="ph-fill ph-check-circle"></i> Jeito Certo (Rápido, Certeiro e Fácil de Revisar)
                             </div>
-                            <div class="text-xs text-slate-700 dark:text-slate-300 mt-1.5 space-y-2">
+                            <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1.5 space-y-2.5 leading-relaxed">
                                 <div>
                                     <strong>Frente (Pergunta):</strong> Qual a diferença entre <em>Limpeza Concorrente</em> e <em>Limpeza Terminal</em>?<br>
                                     <strong>Verso (Resposta):</strong> <u>Concorrente</u> = diária/rotineira (enquanto o local funciona). <u>Terminal</u> = completa/profunda (inclui tetos, paredes e máquinas).
                                 </div>
-                                <div class="pt-2 border-t border-emerald-200/60 dark:border-emerald-800/60">
+                                <div class="pt-2.5 border-t border-emerald-200/60 dark:border-emerald-800/60">
                                     <strong>Frente (Pergunta):</strong> O que significa a regra <em>PVPS</em> no estoque da despensa/merenda?<br>
                                     <strong>Verso (Resposta):</strong> <u>P</u>rimeiro que <u>V</u>ence é o <u>P</u>rimeiro que <u>S</u>ai!
                                 </div>
@@ -415,24 +455,24 @@
         <!-- ================================================================= -->
         <!-- ABA 3: CADERNO DE ERROS & TREINADOR DE FLASHCARDS (ESTILO ANKI)   -->
         <!-- ================================================================= -->
-        <section id="tab-content-erros" class="hidden space-y-6">
+        <section id="tab-content-erros" class="hidden space-y-4 sm:space-y-6">
             
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
                 
                 <!-- Formulário para Adicionar Erro / Flashcard (5 colunas) -->
-                <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm h-fit">
+                <div class="lg:col-span-5 bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm h-fit">
                     <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
                         <i class="ph-fill ph-plus-square text-blue-600 dark:text-blue-400"></i>
                         Registrar Erro ou Novo Flashcard
                     </h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
                         Errou uma questão no Estude Grátis ou Qconcursos? Anote a pegadinha aqui para revisar antes da prova!
                     </p>
 
                     <form onsubmit="addFlashcard(event)" class="mt-4 space-y-3.5">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Disciplina / Matéria</label>
-                            <select id="fc-discipline" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100">
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Disciplina / Matéria</label>
+                            <select id="fc-discipline" class="w-full px-3 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100">
                                 <option value="Conhecimentos Específicos">Conhecimentos Específicos (Peso Maior)</option>
                                 <option value="Língua Portuguesa">Língua Portuguesa</option>
                                 <option value="Matemática / Raciocínio Lógico">Matemática / Raciocínio Lógico</option>
@@ -441,20 +481,20 @@
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Frente do Cartão (A Pergunta ou Pegadinha da Questão)</label>
-                            <textarea id="fc-front" required rows="2" placeholder="Ex: Pode misturar água sanitária (cloro) com amônia ou ácidos para limpar banheiro?" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"></textarea>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Frente do Cartão (A Pergunta ou Pegadinha da Questão)</label>
+                            <textarea id="fc-front" required rows="2" placeholder="Ex: Pode misturar água sanitária (cloro) com amônia ou ácidos para limpar banheiro?" class="w-full px-3 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"></textarea>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Verso do Cartão (A Regra Correta e Direta)</label>
-                            <textarea id="fc-back" required rows="3" placeholder="Ex: PROIBIDO! Essa mistura libera gases tóxicos graves (cloraminas/gás cloro) que causam intoxicação respiratória." class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"></textarea>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Verso do Cartão (A Regra Correta e Direta)</label>
+                            <textarea id="fc-back" required rows="3" placeholder="Ex: PROIBIDO! Essa mistura libera gases tóxicos graves (cloraminas/gás cloro) que causam intoxicação respiratória." class="w-full px-3 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100"></textarea>
                         </div>
 
-                        <div class="flex items-center gap-2 pt-1">
-                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
+                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-3 sm:py-2.5 px-4 min-h-[44px] rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
                                 <i class="ph-bold ph-floppy-disk"></i> Salvar no Caderno de Erros
                             </button>
-                            <button type="button" onclick="loadSampleFlashcards()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs py-2.5 px-3 rounded-xl transition" title="Carregar 5 cartões prontos de revisão para o seu cargo">
+                            <button type="button" onclick="loadSampleFlashcards()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs sm:text-xs py-3 sm:py-2.5 px-3.5 min-h-[44px] rounded-xl transition flex items-center justify-center" title="Carregar 5 cartões prontos de revisão para o seu cargo">
                                 + Exemplos do Cargo
                             </button>
                         </div>
@@ -463,17 +503,17 @@
 
                 <!-- Lista de Cartões + Modo Treino Rápido (7 colunas) -->
                 <div class="lg:col-span-7 space-y-4">
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
                             <div>
                                 <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white flex items-center gap-2">
                                     <i class="ph-fill ph-stack text-amber-500"></i>
                                     Seus Cartões de Revisão
                                 </h3>
-                                <p class="text-xs text-slate-500 dark:text-slate-400">Clique em qualquer cartão para virar e ver a resposta, ou exporte para o aplicativo Anki.</p>
+                                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Clique em qualquer cartão para virar e ver a resposta, ou exporte para o aplicativo Anki.</p>
                             </div>
-                            <button onclick="exportAnkiTSV()" class="bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs px-3 py-2 rounded-xl flex items-center gap-1.5 transition shadow-sm">
-                                <i class="ph-bold ph-download-simple"></i> Exportar para Anki (.txt/.csv)
+                            <button onclick="exportAnkiTSV()" class="w-full sm:w-auto justify-center min-h-[42px] bg-amber-500 hover:bg-amber-600 text-white font-semibold text-xs sm:text-xs px-3.5 py-2.5 rounded-xl flex items-center gap-1.5 transition shadow-sm shrink-0">
+                                <i class="ph-bold ph-download-simple text-sm"></i> Exportar para Anki (.txt/.csv)
                             </button>
                         </div>
 
@@ -489,13 +529,13 @@
         <!-- ================================================================= -->
         <!-- ABA 4: BACKUP, EXPORTAR/IMPORTAR DADOS E CUSTOMIZAÇÃO             -->
         <!-- ================================================================= -->
-        <section id="tab-content-backup" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section id="tab-content-backup" class="hidden space-y-4 sm:space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 
                 <!-- Card Exportar / Importar JSON -->
-                <div class="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl">
+                        <div class="w-11 h-11 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400 flex items-center justify-center text-2xl shrink-0">
                             <i class="ph-duotone ph-shield-check"></i>
                         </div>
                         <div>
@@ -504,17 +544,17 @@
                         </div>
                     </div>
 
-                    <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                         Suas marcações ficam salvas automaticamente no navegador deste aparelho. Se quiser abrir seu progresso em outro celular ou computador (ou guardar uma cópia de segurança), clique em <strong>Baixar Backup</strong> abaixo.
                     </p>
 
-                    <div class="flex flex-wrap gap-3 pt-2">
-                        <button onclick="exportBackupJSON()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm">
-                            <i class="ph-bold ph-download-simple"></i> Baixar Meu Backup (.json)
+                    <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2.5 sm:gap-3 pt-1">
+                        <button onclick="exportBackupJSON()" class="w-full sm:w-auto justify-center min-h-[44px] bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition shadow-sm">
+                            <i class="ph-bold ph-download-simple text-base"></i> Baixar Meu Backup (.json)
                         </button>
 
-                        <label class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition cursor-pointer border border-slate-200 dark:border-slate-700">
-                            <i class="ph-bold ph-upload-simple"></i> Carregar Backup Salvo
+                        <label class="w-full sm:w-auto justify-center min-h-[44px] bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-sm px-4 py-2.5 rounded-xl flex items-center gap-2 transition cursor-pointer border border-slate-200 dark:border-slate-700">
+                            <i class="ph-bold ph-upload-simple text-base"></i> Carregar Backup Salvo
                             <input type="file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
                         </label>
                     </div>
@@ -528,42 +568,68 @@
 
     </main>
 
-    <!-- MODAL PARA ADICIONAR NOVO TÓPICO AO EDITAL -->
-    <div id="add-topic-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+    <!-- NAVEGAÇÃO INFERIOR FIXA (ESTILO APP NATIVO NO CELULAR) -->
+    <nav id="mobile-bottom-nav" aria-label="Navegação mobile" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] safe-bottom">
+        <div class="grid grid-cols-4 gap-1 px-2 pt-1.5 pb-1 max-w-lg mx-auto">
+            <button onclick="switchTab('edital', true)" id="mobile-tab-btn-edital" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
+                <i class="ph-duotone ph-list-checks text-xl"></i>
+                <span>Edital</span>
+            </button>
+            <button onclick="switchTab('guia', true)" id="mobile-tab-btn-guia" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
+                <i class="ph-duotone ph-compass-tool text-xl"></i>
+                <span>Guia & Anki</span>
+            </button>
+            <button onclick="switchTab('erros', true)" id="mobile-tab-btn-erros" class="mobile-tab-btn relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
+                <span class="relative inline-flex">
+                    <i class="ph-duotone ph-notebook text-xl"></i>
+                    <span id="mobile-erros-count-badge" class="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] rounded-full bg-amber-500 text-white font-bold">0</span>
+                </span>
+                <span>Erros</span>
+            </button>
+            <button onclick="switchTab('backup', true)" id="mobile-tab-btn-backup" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
+                <i class="ph-duotone ph-cloud-arrow-up text-xl"></i>
+                <span>Backup</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- MODAL PARA ADICIONAR NOVO TÓPICO AO EDITAL (BOTTOM SHEET NO MOBILE) -->
+    <div id="add-topic-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-5 pb-8 sm:p-6 border-t sm:border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
             <div class="flex items-center justify-between">
                 <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">Adicionar Tópico ao Edital</h3>
-                <button onclick="closeAddTopicModal()" class="text-slate-400 hover:text-slate-600">
+                <button onclick="closeAddTopicModal()" class="p-2 -mr-2 text-slate-400 hover:text-slate-600 rounded-xl" aria-label="Fechar modal">
                     <i class="ph-bold ph-x text-lg"></i>
                 </button>
             </div>
             <form onsubmit="saveCustomTopic(event)" class="space-y-3.5">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Em qual matéria?</label>
-                    <select id="custom-topic-section" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></select>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Em qual matéria?</label>
+                    <select id="custom-topic-section" class="w-full px-3 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"></select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nome do Tópico / Assunto</label>
-                    <input type="text" id="custom-topic-title" required placeholder="Ex: Lei Orgânica Municipal - Artigos 1 ao 45" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Nome do Tópico / Assunto</label>
+                    <input type="text" id="custom-topic-title" required placeholder="Ex: Lei Orgânica Municipal - Artigos 1 ao 45" class="w-full px-3 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Termo curto para busca no YouTube / Questões</label>
-                    <input type="text" id="custom-topic-query" placeholder="Ex: Lei Organica Municipal Concurso" class="w-full px-3 py-2 text-xs sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Termo curto para busca no YouTube / Questões</label>
+                    <input type="text" id="custom-topic-query" placeholder="Ex: Lei Organica Municipal Concurso" class="w-full px-3 py-2.5 text-base sm:text-sm rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeAddTopicModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white">Adicionar ao Checklist</button>
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAddTopicModal()" class="w-full sm:w-auto px-4 py-3 sm:py-2 min-h-[44px] sm:min-h-0 rounded-xl text-sm sm:text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Cancelar</button>
+                    <button type="submit" class="w-full sm:w-auto px-4 py-3 sm:py-2 min-h-[44px] sm:min-h-0 rounded-xl text-sm sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white">Adicionar ao Checklist</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- TOAST DE NOTIFICAÇÃO (Sem usar alert!) -->
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+    <div id="toast-container" class="fixed bottom-20 lg:bottom-5 inset-x-3.5 sm:inset-x-auto sm:right-5 z-50 flex flex-col gap-2 sm:max-w-sm pointer-events-none"></div>
 
     <!-- RODAPÉ -->
-    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 px-4 sm:px-6 mt-10 text-xs text-slate-500 dark:text-slate-400">
-        <div class="max-w-7xl mx-auto flex items-center justify-end gap-2">
+    <footer class="bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-4 pb-24 lg:pb-4 px-4 sm:px-6 mt-8 sm:mt-10 text-xs text-slate-500 dark:text-slate-400">
+        <div class="max-w-7xl mx-auto flex items-center justify-center sm:justify-end gap-2">
             
             <div class="flex items-center gap-3">
                 <span class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
@@ -679,6 +745,7 @@
         let currentProfileId = FIXED_PROFILE_ID;
         let currentTab = 'edital';
         let currentFilterStatus = 'all';
+        let collapsedSections = {};
         let userProgress = {}; // Salvo no localStorage por perfil
 
         // =================================================================
@@ -732,7 +799,7 @@
 
             // Avatar & Títulos
             const avatar = document.getElementById('candidate-avatar');
-            avatar.className = `w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-xl sm:text-2xl shadow-md shrink-0 bg-gradient-to-br ${profile.avatarColor}`;
+            avatar.className = `w-11 h-11 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-white font-display font-extrabold text-lg sm:text-2xl shadow-md shrink-0 bg-gradient-to-br ${profile.avatarColor}`;
             avatar.textContent = profile.avatarLetter;
 
             document.getElementById('candidate-title').textContent = `Portal de Estudos: ${profile.name}`;
@@ -757,8 +824,8 @@
             const weightsBox = document.getElementById('discipline-weights-box');
             weightsBox.innerHTML = profile.weights.map(w => `
                 <div>
-                    <div class="flex justify-between text-xs font-medium text-slate-200 mb-1">
-                        <span class="truncate pr-2">${w.name}</span>
+                    <div class="flex items-start justify-between gap-2 text-xs font-medium text-slate-200 mb-1">
+                        <span class="leading-snug">${w.name}</span>
                         <span class="font-bold shrink-0">${w.pct}%</span>
                     </div>
                     <div class="w-full h-1.5 bg-slate-700 rounded-full overflow-hidden">
@@ -806,6 +873,11 @@
             });
         }
 
+        function toggleSectionCollapse(sectionId) {
+            collapsedSections[sectionId] = !collapsedSections[sectionId];
+            renderSyllabus();
+        }
+
         function renderSyllabus() {
             const container = document.getElementById('syllabus-container');
             const searchQuery = (document.getElementById('topic-search-input').value || '').trim().toLowerCase();
@@ -816,9 +888,9 @@
             ['all', 'pending', 'progress', 'done'].forEach(st => {
                 const btn = document.getElementById(`filter-btn-${st}`);
                 if (st === currentFilterStatus) {
-                    btn.className = 'filter-chip px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white shadow-xs transition';
+                    btn.className = 'filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold bg-blue-600 text-white shadow-xs transition';
                 } else {
-                    btn.className = 'filter-chip px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition';
+                    btn.className = 'filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition';
                 }
             });
 
@@ -857,26 +929,30 @@
 
                 if (filteredTopics.length === 0) return;
 
+                const isCollapsed = !searchQuery && !!collapsedSections[sec.id];
+
                 html += `
                     <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm overflow-hidden">
-                        <!-- Cabeçalho da Disciplina -->
-                        <div class="bg-slate-50/80 dark:bg-slate-800/50 px-4 sm:px-6 py-4 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                            <div>
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <h3 class="font-display font-bold text-base sm:text-lg text-slate-900 dark:text-white">${sec.title}</h3>
-                                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${sec.badgeColor}">${sec.badge}</span>
+                        <!-- Cabeçalho da Disciplina (Tocável para recolher/expandir) -->
+                        <button type="button" onclick="toggleSectionCollapse('${sec.id}')" class="w-full text-left bg-slate-50/80 dark:bg-slate-800/50 px-3.5 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 hover:bg-slate-100/70 dark:hover:bg-slate-800/80 transition">
+                            <div class="flex items-start justify-between gap-2 w-full sm:w-auto">
+                                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 min-w-0">
+                                    <h3 class="font-display font-bold text-sm sm:text-lg text-slate-900 dark:text-white leading-snug">${sec.title}</h3>
+                                    <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full leading-snug ${sec.badgeColor}">${sec.badge}</span>
                                 </div>
+                                <i class="ph-bold ph-caret-down text-slate-400 text-lg shrink-0 mt-0.5 sm:hidden accordion-chevron ${isCollapsed ? 'collapsed' : ''}"></i>
                             </div>
-                            <div class="flex items-center gap-3 sm:w-48 shrink-0">
+                            <div class="flex items-center gap-3 w-full sm:w-52 shrink-0">
                                 <div class="flex-1 h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                                     <div class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: ${secPct}%"></div>
                                 </div>
-                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 w-10 text-right">${secPct}%</span>
+                                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 w-9 text-right shrink-0">${secPct}%</span>
+                                <i class="ph-bold ph-caret-down text-slate-400 text-base shrink-0 hidden sm:inline-block accordion-chevron ${isCollapsed ? 'collapsed' : ''}"></i>
                             </div>
-                        </div>
+                        </button>
 
                         <!-- Lista de Tópicos Verticalizados -->
-                        <div class="divide-y divide-slate-100 dark:divide-slate-800/80">
+                        <div class="${isCollapsed ? 'hidden' : ''} divide-y divide-slate-100 dark:divide-slate-800/80">
                             ${filteredTopics.map(topic => renderTopicRow(topic, profile)).join('')}
                         </div>
                     </div>
@@ -885,10 +961,10 @@
 
             if (!html) {
                 html = `
-                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-10 text-center border border-slate-200 dark:border-slate-800">
+                    <div class="bg-white dark:bg-slate-900 rounded-2xl p-8 sm:p-10 text-center border border-slate-200 dark:border-slate-800">
                         <i class="ph-duotone ph-magnifying-glass text-4xl text-slate-400 mb-2"></i>
                         <p class="font-display font-bold text-base text-slate-700 dark:text-slate-300">Nenhum tópico encontrado com esse filtro</p>
-                        <button onclick="resetFilters()" class="mt-3 text-xs font-semibold text-blue-600 hover:underline">Limpar filtros e mostrar todo o edital</button>
+                        <button onclick="resetFilters()" class="mt-3 px-4 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline">Limpar filtros e mostrar todo o edital</button>
                     </div>
                 `;
             }
@@ -905,11 +981,11 @@
             const youtubeUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(topic.query)}`;
 
             return `
-                <div class="topic-row p-4 sm:px-6 ${allDone ? 'bg-emerald-50/40 dark:bg-emerald-950/15' : 'hover:bg-slate-50/70 dark:hover:bg-slate-800/30'}">
-                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                <div class="topic-row p-3.5 sm:p-4 sm:px-6 ${allDone ? 'bg-emerald-50/40 dark:bg-emerald-950/15' : 'hover:bg-slate-50/70 dark:hover:bg-slate-800/30'}">
+                    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 sm:gap-3.5">
                         
                         <!-- Título do Tópico -->
-                        <div class="flex-1 pr-2">
+                        <div class="flex-1 lg:pr-2 min-w-0">
                             <div class="flex items-start gap-2.5">
                                 <div class="mt-0.5 shrink-0">
                                     ${allDone 
@@ -917,73 +993,77 @@
                                         : '<span class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center text-[10px] text-slate-400"></span>'
                                     }
                                 </div>
-                                <div>
-                                    <p class="text-xs sm:text-sm font-medium leading-snug ${allDone ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}">
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium leading-relaxed break-words ${allDone ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-100'}">
                                         ${topic.title}
                                     </p>
                                     
                                     <!-- Sub-barra com Contador de Questões Feitas e Nota Rápida -->
-                                    <div class="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-                                        <button onclick="toggleNoteBox('${topic.id}')" class="hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 font-medium">
-                                            <i class="ph-bold ph-note-pencil"></i>
+                                    <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2 sm:gap-3 mt-2.5 text-xs text-slate-500 dark:text-slate-400">
+                                        <div class="flex flex-wrap items-center justify-between sm:justify-start gap-1.5 bg-slate-100 dark:bg-slate-800 px-2.5 py-1.5 sm:py-1 rounded-xl border border-slate-200/70 dark:border-slate-700">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-[11px] font-medium">Questões:</span>
+                                                <button onclick="adjustQuestionCount('${topic.id}', 'hit')" class="min-h-[30px] sm:min-h-0 px-2.5 sm:px-1.5 py-1 sm:py-0.5 rounded-lg bg-emerald-100/80 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200/80 dark:hover:bg-emerald-900/70 font-bold text-xs transition" title="Registrar +1 questão certa">+Acerto</button>
+                                                <button onclick="adjustQuestionCount('${topic.id}', 'miss')" class="min-h-[30px] sm:min-h-0 px-2.5 sm:px-1.5 py-1 sm:py-0.5 rounded-lg bg-rose-100/80 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 hover:bg-rose-200/80 dark:hover:bg-rose-900/70 font-bold text-xs transition" title="Registrar +1 questão errada">+Erro</button>
+                                            </div>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="font-bold text-slate-700 dark:text-slate-200 text-xs">${st.qHits || 0}/${st.qTotal || 0}</span>
+                                                ${qAcc !== null ? `<span class="px-1.5 py-0.5 rounded text-[11px] font-bold ${qAcc >= 70 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'}">${qAcc}%</span>` : ''}
+                                                ${st.qTotal > 0 ? `<button onclick="adjustQuestionCount('${topic.id}', 'reset')" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg" title="Zerar contador deste tópico" aria-label="Zerar contador"><i class="ph ph-arrow-counter-clockwise text-sm"></i></button>` : ''}
+                                            </div>
+                                        </div>
+
+                                        <button onclick="toggleNoteBox('${topic.id}')" class="self-start py-1.5 px-2 -ml-2 sm:ml-0 sm:py-1 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1.5 font-medium rounded-lg">
+                                            <i class="ph-bold ph-note-pencil text-sm"></i>
                                             <span>${hasNote ? 'Ver/Editar Anotação' : '+ Anotar resumo/dúvida'}</span>
                                         </button>
-
-                                        <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-lg border border-slate-200/70 dark:border-slate-700">
-                                            <span>Questões:</span>
-                                            <button onclick="adjustQuestionCount('${topic.id}', 'hit')" class="text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-950/60 px-1 rounded font-bold" title="Registrar +1 questão certa">+Acerto</button>
-                                            <button onclick="adjustQuestionCount('${topic.id}', 'miss')" class="text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-950/60 px-1 rounded font-bold" title="Registrar +1 questão errada">+Erro</button>
-                                            <span class="font-bold text-slate-700 dark:text-slate-200 ml-0.5">${st.qHits || 0}/${st.qTotal || 0}</span>
-                                            ${qAcc !== null ? `<span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${qAcc >= 70 ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300' : 'bg-amber-500/20 text-amber-700 dark:text-amber-300'}">${qAcc}%</span>` : ''}
-                                            ${st.qTotal > 0 ? `<button onclick="adjustQuestionCount('${topic.id}', 'reset')" class="text-slate-400 hover:text-slate-600 ml-0.5" title="Zerar contador deste tópico"><i class="ph ph-arrow-counter-clockwise"></i></button>` : ''}
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Controles Direitos: 3 Checkboxes + 2 Botões de Estudo (YouTube e Questões) -->
-                        <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800/60 shrink-0">
+                        <div class="flex flex-col sm:flex-row lg:flex-row items-stretch sm:items-center justify-between lg:justify-end gap-2 pt-2.5 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800/60 shrink-0">
                             
                             <!-- Os 3 Checkboxes de Progresso -->
-                            <div class="flex items-center gap-1.5">
-                                <button onclick="toggleTopicCheck('${topic.id}', 'teoria')" class="check-pill px-2.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
+                            <div class="grid grid-cols-3 lg:flex items-center gap-1.5 w-full sm:w-auto">
+                                <button onclick="toggleTopicCheck('${topic.id}', 'teoria')" class="check-pill min-h-[42px] lg:min-h-0 px-2 sm:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 ${
                                     st.teoria 
                                     ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
                                     : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                                 }">
-                                    <i class="ph-bold ${st.teoria ? 'ph-check-square' : 'ph-square'}"></i>
+                                    <i class="ph-bold ${st.teoria ? 'ph-check-square' : 'ph-square'} text-sm"></i>
                                     <span>Teoria</span>
                                 </button>
 
-                                <button onclick="toggleTopicCheck('${topic.id}', 'revisao')" class="check-pill px-2.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
+                                <button onclick="toggleTopicCheck('${topic.id}', 'revisao')" class="check-pill min-h-[42px] lg:min-h-0 px-2 sm:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 ${
                                     st.revisao 
                                     ? 'bg-amber-500 text-white border-amber-500 shadow-xs' 
                                     : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                                 }">
-                                    <i class="ph-bold ${st.revisao ? 'ph-check-square' : 'ph-square'}"></i>
+                                    <i class="ph-bold ${st.revisao ? 'ph-check-square' : 'ph-square'} text-sm"></i>
                                     <span>Revisão</span>
                                 </button>
 
-                                <button onclick="toggleTopicCheck('${topic.id}', 'questoes')" class="check-pill px-2.5 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${
+                                <button onclick="toggleTopicCheck('${topic.id}', 'questoes')" class="check-pill min-h-[42px] lg:min-h-0 px-2 sm:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 ${
                                     st.questoes 
                                     ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
                                     : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                                 }">
-                                    <i class="ph-bold ${st.questoes ? 'ph-check-square' : 'ph-square'}"></i>
+                                    <i class="ph-bold ${st.questoes ? 'ph-check-square' : 'ph-square'} text-sm"></i>
                                     <span>Questões</span>
                                 </button>
                             </div>
 
                             <!-- Links Externos: Vídeo-aula (YouTube) e Treino de Questões -->
-                            <div class="flex items-center gap-1.5">
-                                <a href="${youtubeUrl}" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900/70 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/70 flex items-center gap-1 transition" title="Buscar vídeo-aula deste assunto no YouTube">
-                                    <i class="ph-fill ph-youtube-logo text-sm text-rose-600 dark:text-rose-400"></i>
-                                    <span class="hidden sm:inline">Aula</span>
+                            <div class="grid grid-cols-2 lg:flex items-center gap-2 lg:gap-1.5 w-full sm:w-auto">
+                                <a href="${youtubeUrl}" target="_blank" rel="noopener" class="min-h-[42px] lg:min-h-0 px-3 lg:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900/70 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800/70 flex items-center justify-center gap-1.5 transition" title="Buscar vídeo-aula deste assunto no YouTube">
+                                    <i class="ph-fill ph-youtube-logo text-base lg:text-sm text-rose-600 dark:text-rose-400"></i>
+                                    <span>Aula</span>
                                 </a>
 
-                                <button onclick="openTopicQuestions('${topic.query.replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/70 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/70 flex items-center gap-1 transition" title="Fazer questões deste assunto no ${profile.questionPlatformName}">
-                                    <i class="ph-bold ph-exam text-sm"></i>
+                                <button onclick="openTopicQuestions('${topic.query.replace(/'/g, "\'")}')" class="min-h-[42px] lg:min-h-0 px-3 lg:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/70 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/70 flex items-center justify-center gap-1.5 transition" title="Fazer questões deste assunto no ${profile.questionPlatformName}">
+                                    <i class="ph-bold ph-exam text-base lg:text-sm"></i>
                                     <span>Treinar</span>
                                 </button>
                             </div>
@@ -994,8 +1074,8 @@
                     <!-- Caixa Expansível de Anotação Pessoal do Tópico -->
                     <div id="note-box-${topic.id}" class="${hasNote ? '' : 'hidden'} mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800/70">
                         <div class="flex items-start gap-2">
-                            <i class="ph-fill ph-push-pin text-amber-500 mt-2"></i>
-                            <textarea oninput="saveTopicNote('${topic.id}', this.value)" rows="2" placeholder="Escreva aqui seu resumo rápido, artigos de lei ou pontos para não esquecer neste tópico..." class="w-full text-xs p-2.5 rounded-xl bg-amber-50/50 dark:bg-slate-800/90 border border-amber-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400">${st.note || ''}</textarea>
+                            <i class="ph-fill ph-push-pin text-amber-500 mt-2.5 shrink-0"></i>
+                            <textarea oninput="saveTopicNote('${topic.id}', this.value)" rows="2" placeholder="Escreva aqui seu resumo rápido, artigos de lei ou pontos para não esquecer neste tópico..." class="w-full text-base sm:text-xs p-3 sm:p-2.5 rounded-xl bg-amber-50/50 dark:bg-slate-800/90 border border-amber-200/80 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400">${st.note || ''}</textarea>
                         </div>
                     </div>
                 </div>
@@ -1114,7 +1194,13 @@
             document.getElementById('stat-acertos-pct').textContent = pctAccuracy !== null ? `${pctAccuracy}%` : '--%';
             document.getElementById('stat-acertos-count').textContent = `${totalQuestionsHits} acertos / ${totalQuestionsSolved} feitas`;
 
-            document.getElementById('erros-count-badge').textContent = (userProgress.flashcards || []).length;
+            const cardsCount = (userProgress.flashcards || []).length;
+            document.getElementById('erros-count-badge').textContent = cardsCount;
+            const mobileBadge = document.getElementById('mobile-erros-count-badge');
+            if (mobileBadge) {
+                mobileBadge.textContent = cardsCount;
+                mobileBadge.classList.toggle('hidden', cardsCount === 0);
+            }
         }
 
         // =================================================================
@@ -1126,28 +1212,28 @@
 
             if (p.id === 'cris') {
                 box.innerHTML = `
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                         <div>
                             <span class="text-xs font-bold uppercase text-purple-600 dark:text-purple-400">Plano Tático • Contagem/MG (Banca IBGP)</span>
-                            <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5">Estratégia para Auditor de Controle Interno - Direito (Código 506)</h3>
+                            <h3 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-0.5 leading-snug">Estratégia para Auditor de Controle Interno - Direito (Código 506)</h3>
                         </div>
-                        <span class="text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-800">
+                        <span class="text-xs font-semibold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 px-3 py-1.5 rounded-xl border border-rose-200 dark:border-rose-800 self-start md:self-auto">
                             Linha de Corte Discursiva: 20 Ampla | 17 Negros | 20 PcD
                         </span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                         <div class="space-y-2">
                             <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <i class="ph-fill ph-scales text-purple-500"></i> 1. Como a Banca IBGP Cobra Direito e Legislação
+                                <i class="ph-fill ph-scales text-purple-500 shrink-0"></i> 1. Como a Banca IBGP Cobra Direito e Legislação
                             </h4>
                             <p>A banca IBGP cobra fortemente a <strong>literalidade da lei seca</strong> combinada com jurisprudência consolidada (Súmulas do STF/STJ) nas questões objetivas. Dê atenção especial à <strong>Lei Complementar Municipal nº 255/2018</strong> (que estrutura o Sistema de Controle Interno de Contagem), à <strong>Lei nº 14.133/2021</strong> (especialmente os arts. 169 a 173 sobre controle das contratações), à <strong>LRF (LC 101/2000)</strong> e à <strong>Lei nº 8.429/1992 reformada</strong>.</p>
                         </div>
                         <div class="space-y-2">
                             <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <i class="ph-fill ph-pencil-line text-rose-500"></i> 2. Como Gabaritar as 2 Discursivas em 10 Linhas (Item 9.4.3 do Edital)
+                                <i class="ph-fill ph-pencil-line text-rose-500 shrink-0"></i> 2. Como Gabaritar as 2 Discursivas em 10 Linhas (Item 9.4.3 do Edital)
                             </h4>
                             <p>Você terá <strong>máximo de 10 linhas para cada estudo de caso</strong> (15 pontos cada = 30 pontos). Como o espaço é curtíssimo, não faça introduções históricas! Use o modelo de 3 períodos:</p>
-                            <ul class="list-disc list-inside space-y-1 text-xs">
+                            <ul class="list-disc list-inside space-y-1.5 text-xs sm:text-sm">
                                 <li><strong>Linhas 1 a 3 (Conclusão Direta + Fundamento Legal):</strong> Responda diretamente se o ato do caso é regular ou irregular citando o artigo/lei ou princípio aplicável (vale 6,0 pts de Conteúdo).</li>
                                 <li><strong>Linhas 4 a 7 (Desenvolvimento Técnico):</strong> Explique a consequência jurídica e a jurisprudência ou regra de controle aplicável (vale 3,0 pts de Argumentação + 3,0 pts de Estrutura Lógica).</li>
                                 <li><strong>Linhas 8 a 10 (Providência do Controle Interno):</strong> Indique a medida cabível pelo Auditor (ex: recomendar anulação, instaurar TCE, cientificar o Prefeito/TCE-MG).</li>
@@ -1157,25 +1243,25 @@
                 `;
             } else if (p.id === 'biel' || p.id === 'alice' || p.id === 'natalice') {
                 box.innerHTML = `
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
                         <div>
                             <span class="text-xs font-bold uppercase text-blue-600 dark:text-blue-400">Plano Tático • Inhapim/MG (Banca Fronte Concursos)</span>
-                            <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5">Como Garantir sua Vaga em Inhapim (${p.name})</h3>
+                            <h3 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-0.5 leading-snug">Como Garantir sua Vaga em Inhapim (${p.name})</h3>
                         </div>
-                        <span class="text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                        <span class="text-xs font-semibold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 self-start md:self-auto">
                             Prova de 30 Questões (A, B, C, D) • 3 Horas de Duração
                         </span>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
                         <div class="space-y-2">
                             <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <i class="ph-fill ph-star text-amber-500"></i> 1. A Regra dos 75% (Conhecimentos Específicos)
+                                <i class="ph-fill ph-star text-amber-500 shrink-0"></i> 1. A Regra dos 75% (Conhecimentos Específicos)
                             </h4>
                             <p>No concurso de Inhapim, <strong>Conhecimentos Específicos tem 20 questões</strong> e cada questão certa vale <strong>3,75 pontos</strong> (totalizando 75 dos 100 pontos da prova!). Além disso, em caso de empate, passa quem acertar mais em Conhecimentos Específicos. Dedique <strong>70% do seu tempo de estudo</strong> para dominar todos os tópicos da Parte I do seu checklist!</p>
                         </div>
                         <div class="space-y-2">
                             <h4 class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-                                <i class="ph-fill ph-shield-warning text-rose-500"></i> 2. Cuidado com a Eliminação por Zerar Matéria!
+                                <i class="ph-fill ph-shield-warning text-rose-500 shrink-0"></i> 2. Cuidado com a Eliminação por Zerar Matéria!
                             </h4>
                             <p>O item 8.3 do edital diz que <strong>quem zerar Português ou Matemática é eliminado do concurso</strong>, mesmo que gabarite a parte específica! São apenas 5 questões de Português e 5 de Matemática. Comece estudando os tópicos mais fáceis e que sempre caem: <em>Interpretação de Texto, Acentuação e Crase</em> em Português; e <em>Porcentagem, Regra de Três e Sistema de Medidas/Monetário</em> em Matemática.</p>
                         </div>
@@ -1185,8 +1271,8 @@
                 box.innerHTML = `
                     <div>
                         <span class="text-xs font-bold uppercase text-blue-600 dark:text-blue-400">Plano de Revisão • Contador Contagem/MG</span>
-                        <h3 class="font-display font-extrabold text-xl text-slate-900 dark:text-white mt-0.5">Foco em Questões Comentadas IBGP + MCASP/LRF</h3>
-                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-2">Resolva baterias de questões da banca IBGP no Qconcursos filtrando por Contabilidade Aplicada ao Setor Público, AFO e Contabilidade Geral para pegar o ritmo da banca rapidamente.</p>
+                        <h3 class="font-display font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white mt-0.5">Foco em Questões Comentadas IBGP + MCASP/LRF</h3>
+                        <p class="text-sm text-slate-600 dark:text-slate-300 mt-2 leading-relaxed">Resolva baterias de questões da banca IBGP no Qconcursos filtrando por Contabilidade Aplicada ao Setor Público, AFO e Contabilidade Geral para pegar o ritmo da banca rapidamente.</p>
                     </div>
                 `;
             }
@@ -1203,9 +1289,9 @@
                 container.innerHTML = `
                     <div class="text-center py-8 px-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700">
                         <i class="ph-duotone ph-cards text-3xl text-slate-400"></i>
-                        <p class="text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300 mt-2">Seu Caderno de Erros ainda está vazio</p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Adicione uma questão que você errou no formulário ao lado ou clique abaixo para carregar exemplos prontos do seu cargo!</p>
-                        <button onclick="loadSampleFlashcards()" class="mt-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl transition">
+                        <p class="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-2">Seu Caderno de Erros ainda está vazio</p>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Adicione uma questão que você errou no formulário ao lado ou clique abaixo para carregar exemplos prontos do seu cargo!</p>
+                        <button onclick="loadSampleFlashcards()" class="mt-4 w-full sm:w-auto min-h-[42px] bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl transition">
                             Carregar Cartões de Exemplo para ${CANDIDATE_PROFILES[currentProfileId].name}
                         </button>
                     </div>
@@ -1216,21 +1302,21 @@
             container.innerHTML = cards.map((c, idx) => `
                 <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 transition">
                     <div class="flex items-center justify-between gap-2 mb-2">
-                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
+                        <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300">
                             ${c.discipline}
                         </span>
-                        <button onclick="deleteFlashcard(${idx})" class="text-slate-400 hover:text-rose-500 text-xs flex items-center gap-1">
-                            <i class="ph-bold ph-trash"></i> Excluir
+                        <button onclick="deleteFlashcard(${idx})" class="p-2 -mr-2 text-slate-400 hover:text-rose-500 text-xs flex items-center gap-1 rounded-lg">
+                            <i class="ph-bold ph-trash text-sm"></i> Excluir
                         </button>
                     </div>
-                    <div class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                    <div class="text-sm font-bold text-slate-900 dark:text-white leading-relaxed">
                         <span class="text-blue-600 dark:text-blue-400">Pergunta:</span> ${c.front}
                     </div>
-                    <div id="fc-answer-${idx}" class="hidden mt-2.5 pt-2.5 border-t border-slate-200 dark:border-slate-700 text-xs sm:text-sm text-emerald-800 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/30 p-2.5 rounded-lg">
+                    <div id="fc-answer-${idx}" class="hidden mt-3 pt-2.5 border-t border-slate-200 dark:border-slate-700 text-sm text-emerald-800 dark:text-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/30 p-3 rounded-lg leading-relaxed">
                         <span class="font-bold">Resposta:</span> ${c.back}
                     </div>
-                    <button onclick="toggleFlashcardAnswer(${idx})" class="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1">
-                        <i class="ph-bold ph-eye"></i> Mostrar / Ocultar Resposta
+                    <button onclick="toggleFlashcardAnswer(${idx})" class="mt-3 w-full sm:w-auto min-h-[40px] sm:min-h-0 px-3 py-2 sm:px-0 sm:py-1 rounded-xl sm:rounded-none bg-amber-50 dark:bg-amber-950/40 sm:bg-transparent sm:dark:bg-transparent border border-amber-200/70 dark:border-amber-800/50 sm:border-0 text-xs font-semibold text-amber-700 dark:text-amber-400 hover:underline flex items-center justify-center sm:justify-start gap-1.5">
+                        <i class="ph-bold ph-eye text-sm"></i> Mostrar / Ocultar Resposta
                     </button>
                 </div>
             `).join('');
@@ -1379,19 +1465,33 @@
         // =================================================================
         // NAVEGAÇÃO ENTRE ABAS, FILTROS, TEMA E UTILITÁRIOS
         // =================================================================
-        function switchTab(tabId) {
+        function switchTab(tabId, fromMobileNav = false) {
             currentTab = tabId;
             ['edital', 'guia', 'erros', 'backup'].forEach(t => {
                 const content = document.getElementById(`tab-content-${t}`);
                 const btn = document.getElementById(`tab-btn-${t}`);
+                const mobileBtn = document.getElementById(`mobile-tab-btn-${t}`);
                 if (t === tabId) {
                     content.classList.remove('hidden');
-                    btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap bg-blue-600 text-white shadow-xs transition';
+                    if (btn) {
+                        btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-bold text-sm flex items-center gap-2 whitespace-nowrap bg-blue-600 text-white shadow-xs transition';
+                    }
+                    if (mobileBtn) {
+                        mobileBtn.className = 'mobile-tab-btn relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-bold transition min-h-[50px] bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400';
+                    }
                 } else {
                     content.classList.add('hidden');
-                    btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-semibold text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+                    if (btn) {
+                        btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-semibold text-sm flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+                    }
+                    if (mobileBtn) {
+                        mobileBtn.className = 'mobile-tab-btn relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-medium transition min-h-[50px] text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
+                    }
                 }
             });
+            if (fromMobileNav && window.scrollY > 180) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
         }
 
         function setFilterStatus(status) {
@@ -1410,21 +1510,27 @@
             renderSyllabus();
         }
 
+        function syncThemeIcons(isDark) {
+            document.querySelectorAll('.theme-icon-el').forEach(el => {
+                el.className = isDark
+                    ? 'theme-icon-el ph-duotone ph-sun text-lg text-amber-400'
+                    : 'theme-icon-el ph-duotone ph-moon text-lg';
+            });
+        }
+
         function initTheme() {
             const savedTheme = localStorage.getItem('portal_concursos_theme');
             const useDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (useDark) {
                 document.documentElement.classList.add('dark');
-                document.getElementById('theme-icon').className = 'ph-duotone ph-sun text-lg text-amber-400';
             }
+            syncThemeIcons(useDark);
         }
 
         function toggleDarkMode() {
             const isDark = document.documentElement.classList.toggle('dark');
             localStorage.setItem('portal_concursos_theme', isDark ? 'dark' : 'light');
-            document.getElementById('theme-icon').className = isDark 
-                ? 'ph-duotone ph-sun text-lg text-amber-400' 
-                : 'ph-duotone ph-moon text-lg';
+            syncThemeIcons(isDark);
         }
 
         function copyToClipboard(text) {
