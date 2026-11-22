@@ -6,6 +6,15 @@
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
     <title>Portal de Estudos | Biel</title>
+    <!-- PWA Manifest & Icons -->
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Estudos Biel">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts: Inter & Plus Jakarta Sans -->
@@ -146,6 +155,12 @@
                             <div class="font-display font-bold text-sm sm:text-base text-slate-900 dark:text-white leading-tight mt-0.5" id="exam-countdown-text">Calculando...</div>
                         </div>
                     </div>
+
+                    <!-- Botão Instalar Aplicativo (PWA) -->
+                    <button id="pwa-install-btn" onclick="triggerPWAInstall()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-4 py-2.5 min-h-[44px] rounded-xl items-center justify-center gap-2 shadow-sm transition" title="Instalar este portal como aplicativo no seu celular ou computador">
+                        <i class="ph-bold ph-download-simple text-lg shrink-0"></i>
+                        <span>Instalar App</span>
+                    </button>
 
                     <!-- Link Direto Plataforma de Questões -->
                     <a id="header-questions-btn" href="#" target="_blank" rel="noopener" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2.5 min-h-[44px] rounded-xl flex items-center justify-center gap-2 shadow-sm transition">
@@ -624,6 +639,36 @@
         </div>
     </div>
 
+    <!-- MODAL INSTRUÇÕES DE INSTALAÇÃO NO IPHONE (SAFARI) -->
+    <div id="ios-install-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 pb-8 sm:p-6 border-t sm:border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
+            <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
+            <div class="flex items-center justify-between">
+                <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                    <i class="ph-duotone ph-device-mobile text-emerald-600 dark:text-emerald-400 text-xl"></i>
+                    <span>Instalar no iPhone</span>
+                </h3>
+                <button onclick="closeIOSInstallModal()" class="p-2 -mr-2 text-slate-400 hover:text-slate-600 rounded-xl" aria-label="Fechar modal">
+                    <i class="ph-bold ph-x text-lg"></i>
+                </button>
+            </div>
+            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                No Safari do iPhone, siga estes 2 passos rápidos para colocar o portal na sua Tela de Início como aplicativo:
+            </p>
+            <ol class="space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
+                <li class="flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+                    <span>Toque no botão <strong>Compartilhar</strong> <i class="ph-bold ph-export inline align-text-bottom"></i> na barra inferior do Safari.</span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                    <span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+                    <span>Role para baixo e toque em <strong>Adicionar à Tela de Início</strong>.</span>
+                </li>
+            </ol>
+            <button type="button" onclick="closeIOSInstallModal()" class="w-full py-3 min-h-[44px] rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition">Entendi</button>
+        </div>
+    </div>
+
     <!-- TOAST DE NOTIFICAÇÃO (Sem usar alert!) -->
     <div id="toast-container" class="fixed bottom-20 lg:bottom-5 inset-x-3.5 sm:inset-x-auto sm:right-5 z-50 flex flex-col gap-2 sm:max-w-sm pointer-events-none"></div>
 
@@ -1092,6 +1137,7 @@
             userProgress.topics[topicId][field] = !userProgress.topics[topicId][field];
             saveUserProgress();
             renderSyllabus();
+            scheduleProgressTelemetry('marcou_edital', `${field}:${topicId}`);
         }
 
         function adjustQuestionCount(topicId, action) {
@@ -1112,6 +1158,7 @@
             }
             saveUserProgress();
             renderSyllabus();
+            scheduleProgressTelemetry('registrou_questao', action);
         }
 
         function toggleNoteBox(topicId) {
@@ -1131,6 +1178,7 @@
             const profile = CANDIDATE_PROFILES[currentProfileId];
             // Limpa a palavra "Concurso" do final para busca mais precisa em bancos de questões
             const cleanTerm = rawQuery.replace(/\bConcurso\b/gi, '').trim();
+            sendTelemetry('abriu_questoes', cleanTerm);
 
             if (profile.questionPlatformType === 'qconcursos') {
                 const url = `https://www.qconcursos.com/questoes-de-concursos/questoes?q=${encodeURIComponent(cleanTerm)}`;
@@ -1336,6 +1384,7 @@
             document.getElementById('fc-front').value = '';
             document.getElementById('fc-back').value = '';
             showToast('Cartão salvo no Caderno de Erros!', 'success');
+            sendTelemetry('criou_flashcard', discipline);
         }
 
         function toggleFlashcardAnswer(idx) {
@@ -1568,6 +1617,169 @@
                 setTimeout(() => toast.remove(), 300);
             }, 3500);
         }
+
+        // =================================================================
+        // PWA: REGISTRO DO SERVICE WORKER E BOTÃO "INSTALAR APP"
+        // =================================================================
+        let deferredInstallPrompt = null;
+
+        function isRunningStandalone() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        function isIOSSafari() {
+            const ua = window.navigator.userAgent || '';
+            const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const isWebkit = /WebKit/i.test(ua);
+            const isOtherBrowser = /CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
+            return isIOS && isWebkit && !isOtherBrowser;
+        }
+
+        function showPWAInstallButton() {
+            if (isRunningStandalone()) return;
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) {
+                btn.classList.remove('hidden');
+                btn.classList.add('flex');
+            }
+        }
+
+        function hidePWAInstallButton() {
+            const btn = document.getElementById('pwa-install-btn');
+            if (btn) {
+                btn.classList.add('hidden');
+                btn.classList.remove('flex');
+            }
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredInstallPrompt = e;
+            showPWAInstallButton();
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredInstallPrompt = null;
+            hidePWAInstallButton();
+            showToast('Aplicativo instalado! Agora você pode abrir direto pela tela inicial.', 'success');
+            sendTelemetry('instalou_app', 'Chrome PWA');
+        });
+
+        async function triggerPWAInstall() {
+            if (deferredInstallPrompt) {
+                deferredInstallPrompt.prompt();
+                const { outcome } = await deferredInstallPrompt.userChoice;
+                deferredInstallPrompt = null;
+                if (outcome === 'accepted') {
+                    hidePWAInstallButton();
+                }
+                return;
+            }
+            if (isIOSSafari()) {
+                const modal = document.getElementById('ios-install-modal');
+                if (modal) modal.classList.remove('hidden');
+                return;
+            }
+            showToast('No menu do Chrome (⋮), toque em "Instalar aplicativo" ou "Adicionar à tela inicial".', 'info');
+        }
+
+        function closeIOSInstallModal() {
+            const modal = document.getElementById('ios-install-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        if (isIOSSafari() && !isRunningStandalone()) {
+            window.addEventListener('DOMContentLoaded', showPWAInstallButton);
+        }
+
+        if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            });
+        }
+
+        // =================================================================
+        // MONITORAMENTO DE USO E INSTALAÇÃO (GOOGLE SHEETS / APPS SCRIPT)
+        // =================================================================
+        // Cole aqui a URL do App da Web gerada no Google Apps Script (termina em /exec)
+        const TELEMETRY_ENDPOINT = '';
+        let telemetryDebounceTimer = null;
+
+        function getDeviceLabel() {
+            const ua = window.navigator.userAgent || '';
+            if (/Android/i.test(ua)) return 'Android';
+            if (/iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) return 'iPhone/iPad';
+            if (/Windows/i.test(ua)) return 'Windows';
+            if (/Mac/i.test(ua)) return 'Mac';
+            return 'Outro';
+        }
+
+        function getAppModeLabel() {
+            return isRunningStandalone() ? 'App Instalado' : 'Navegador';
+        }
+
+        function getStudySnapshot() {
+            const sections = getMergedSections();
+            let totalTopics = 0, doneChecks = 0, qTotal = 0, qHits = 0;
+            sections.forEach(sec => {
+                sec.topics.forEach(t => {
+                    totalTopics++;
+                    const st = userProgress.topics[t.id] || {};
+                    if (st.teoria) doneChecks++;
+                    if (st.revisao) doneChecks++;
+                    if (st.questoes) doneChecks++;
+                    qTotal += (st.qTotal || 0);
+                    qHits += (st.qHits || 0);
+                });
+            });
+            const totalChecks = totalTopics * 3;
+            const pct = totalChecks > 0 ? Math.round((doneChecks / totalChecks) * 100) : 0;
+            const flashcards = (userProgress.flashcards || []).length;
+            return { pct, doneChecks, totalChecks, qTotal, qHits, flashcards };
+        }
+
+        function sendTelemetry(eventName, detail = '') {
+            if (!TELEMETRY_ENDPOINT) return;
+            try {
+                const profile = CANDIDATE_PROFILES[currentProfileId];
+                const snap = getStudySnapshot();
+                const payload = JSON.stringify({
+                    portal: profile ? profile.name : currentProfileId,
+                    event: eventName,
+                    mode: getAppModeLabel(),
+                    device: getDeviceLabel(),
+                    pct: snap.pct,
+                    etapas: `${snap.doneChecks}/${snap.totalChecks}`,
+                    questoes: snap.qTotal,
+                    acertos: snap.qHits,
+                    flashcards: snap.flashcards,
+                    detail: String(detail || '').slice(0, 140)
+                });
+                if (navigator.sendBeacon) {
+                    const blob = new Blob([payload], { type: 'text/plain;charset=UTF-8' });
+                    navigator.sendBeacon(TELEMETRY_ENDPOINT, blob);
+                } else {
+                    fetch(TELEMETRY_ENDPOINT, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                        body: payload,
+                        keepalive: true
+                    }).catch(() => {});
+                }
+            } catch (err) {}
+        }
+
+        function scheduleProgressTelemetry(eventName, detail = '') {
+            clearTimeout(telemetryDebounceTimer);
+            telemetryDebounceTimer = setTimeout(() => {
+                sendTelemetry(eventName, detail);
+            }, 2500);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => sendTelemetry('abertura', window.location.hostname), 800);
+        });
     </script>
 </body>
 </html>
