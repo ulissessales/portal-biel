@@ -1,4 +1,4 @@
-const CACHE_NAME = 'portal-estudos-biel-v1';
+const CACHE_NAME = 'portal-estudos-biel-v2';
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -35,14 +35,18 @@ self.addEventListener('fetch', (event) => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+  // Nunca interceptar CDNs externos (Tailwind, Phosphor, Google Fonts, Apps Script)
+  if (url.origin !== self.location.origin) return;
 
-  // Navegacao (index.html): tenta rede primeiro para pegar atualizacoes e usa cache se offline
-  if (req.mode === 'navigate' || (url.origin === self.location.origin && (url.pathname === '/' || url.pathname.endsWith('.html')))) {
+  // Navegacao (index.html): rede primeiro para pegar atualizacoes, cache se offline
+  if (req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html')) {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          }
           return res;
         })
         .catch(() => caches.match(req).then((cached) => cached || caches.match('./index.html')))
@@ -50,12 +54,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Demais arquivos (icones, fontes, scripts): responde rapido do cache e atualiza em segundo plano
+  // Arquivos locais (icones e manifest): cache primeiro com atualizacao em segundo plano
   event.respondWith(
     caches.match(req).then((cached) => {
       const networkFetch = fetch(req)
         .then((res) => {
-          if (res && (res.status === 200 || res.type === 'opaque')) {
+          if (res && res.status === 200) {
             const copy = res.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           }

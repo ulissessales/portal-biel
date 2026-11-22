@@ -50,9 +50,11 @@
 
     <style>
         /* Mobile Ergonomics, Safe Areas & Custom Scrollbar */
-        html, body {
-            overflow-x: clip;
+        html {
             -webkit-text-size-adjust: 100%;
+        }
+        body {
+            overflow-x: hidden;
         }
         button, a, select, input, textarea, label {
             -webkit-tap-highlight-color: transparent;
@@ -157,7 +159,7 @@
                     </div>
 
                     <!-- Botão Instalar Aplicativo (PWA) -->
-                    <button id="pwa-install-btn" onclick="triggerPWAInstall()" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-4 py-2.5 min-h-[44px] rounded-xl items-center justify-center gap-2 shadow-sm transition" title="Instalar este portal como aplicativo no seu celular ou computador">
+                    <button type="button" id="pwa-install-btn" onclick="triggerPWAInstall()" class="flex bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-4 py-2.5 min-h-[44px] rounded-xl items-center justify-center gap-2 shadow-sm transition" title="Instalar este portal como aplicativo no seu celular ou computador">
                         <i class="ph-bold ph-download-simple text-lg shrink-0"></i>
                         <span>Instalar App</span>
                     </button>
@@ -203,7 +205,7 @@
     <main class="flex-1 max-w-7xl w-full mx-auto px-3.5 sm:px-6 py-4 sm:py-6 space-y-4 sm:space-y-6">
 
         <!-- RESUMO DE PROGRESSO E FICHA ESTRATÉGICA DO CARGO -->
-        <section class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4">
+        <section id="dashboard-summary-section" class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 sm:gap-4">
             
             <!-- Card de Progresso Geral e Pilares (7 colunas) -->
             <div class="lg:col-span-7 bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between">
@@ -584,32 +586,32 @@
     </main>
 
     <!-- NAVEGAÇÃO INFERIOR FIXA (ESTILO APP NATIVO NO CELULAR) -->
-    <nav id="mobile-bottom-nav" aria-label="Navegação mobile" class="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] safe-bottom">
+    <nav id="mobile-bottom-nav" aria-label="Navegação mobile" class="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] safe-bottom">
         <div class="grid grid-cols-4 gap-1 px-2 pt-1.5 pb-1 max-w-lg mx-auto">
-            <button onclick="switchTab('edital', true)" id="mobile-tab-btn-edital" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
-                <i class="ph-duotone ph-list-checks text-xl"></i>
-                <span>Edital</span>
+            <button type="button" onclick="switchTab('edital', true)" id="mobile-tab-btn-edital" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[52px]">
+                <i class="ph-duotone ph-list-checks text-xl pointer-events-none"></i>
+                <span class="pointer-events-none">Edital</span>
             </button>
-            <button onclick="switchTab('guia', true)" id="mobile-tab-btn-guia" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
-                <i class="ph-duotone ph-compass-tool text-xl"></i>
-                <span>Guia & Anki</span>
+            <button type="button" onclick="switchTab('guia', true)" id="mobile-tab-btn-guia" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[52px]">
+                <i class="ph-duotone ph-compass-tool text-xl pointer-events-none"></i>
+                <span class="pointer-events-none">Guia & Anki</span>
             </button>
-            <button onclick="switchTab('erros', true)" id="mobile-tab-btn-erros" class="mobile-tab-btn relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
-                <span class="relative inline-flex">
+            <button type="button" onclick="switchTab('erros', true)" id="mobile-tab-btn-erros" class="mobile-tab-btn relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[52px]">
+                <span class="relative inline-flex pointer-events-none">
                     <i class="ph-duotone ph-notebook text-xl"></i>
                     <span id="mobile-erros-count-badge" class="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] rounded-full bg-amber-500 text-white font-bold">0</span>
                 </span>
-                <span>Erros</span>
+                <span class="pointer-events-none">Erros</span>
             </button>
-            <button onclick="switchTab('backup', true)" id="mobile-tab-btn-backup" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[50px]">
-                <i class="ph-duotone ph-cloud-arrow-up text-xl"></i>
-                <span>Backup</span>
+            <button type="button" onclick="switchTab('backup', true)" id="mobile-tab-btn-backup" class="mobile-tab-btn flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-semibold transition min-h-[52px]">
+                <i class="ph-duotone ph-cloud-arrow-up text-xl pointer-events-none"></i>
+                <span class="pointer-events-none">Backup</span>
             </button>
         </div>
     </nav>
 
     <!-- MODAL PARA ADICIONAR NOVO TÓPICO AO EDITAL (BOTTOM SHEET NO MOBILE) -->
-    <div id="add-topic-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div id="add-topic-modal" class="hidden fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[90dvh] overflow-y-auto p-5 pb-8 sm:p-6 border-t sm:border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
             <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
             <div class="flex items-center justify-between">
@@ -639,32 +641,20 @@
         </div>
     </div>
 
-    <!-- MODAL INSTRUÇÕES DE INSTALAÇÃO NO IPHONE (SAFARI) -->
-    <div id="ios-install-modal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <!-- MODAL INSTRUÇÕES DE INSTALAÇÃO DO APP (ANDROID / IPHONE) -->
+    <div id="ios-install-modal" class="hidden fixed inset-0 z-[60] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl max-w-md w-full p-5 pb-8 sm:p-6 border-t sm:border border-slate-200 dark:border-slate-800 shadow-xl space-y-4">
             <div class="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto sm:hidden"></div>
             <div class="flex items-center justify-between">
-                <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
+                <h3 id="install-modal-title" class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2">
                     <i class="ph-duotone ph-device-mobile text-emerald-600 dark:text-emerald-400 text-xl"></i>
-                    <span>Instalar no iPhone</span>
+                    <span>Como Instalar o Aplicativo</span>
                 </h3>
-                <button onclick="closeIOSInstallModal()" class="p-2 -mr-2 text-slate-400 hover:text-slate-600 rounded-xl" aria-label="Fechar modal">
+                <button type="button" onclick="closeIOSInstallModal()" class="p-2 -mr-2 text-slate-400 hover:text-slate-600 rounded-xl" aria-label="Fechar modal">
                     <i class="ph-bold ph-x text-lg"></i>
                 </button>
             </div>
-            <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                No Safari do iPhone, siga estes 2 passos rápidos para colocar o portal na sua Tela de Início como aplicativo:
-            </p>
-            <ol class="space-y-2.5 text-sm text-slate-700 dark:text-slate-200">
-                <li class="flex items-start gap-2.5">
-                    <span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
-                    <span>Toque no botão <strong>Compartilhar</strong> <i class="ph-bold ph-export inline align-text-bottom"></i> na barra inferior do Safari.</span>
-                </li>
-                <li class="flex items-start gap-2.5">
-                    <span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
-                    <span>Role para baixo e toque em <strong>Adicionar à Tela de Início</strong>.</span>
-                </li>
-            </ol>
+            <div id="install-modal-body" class="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed"></div>
             <button type="button" onclick="closeIOSInstallModal()" class="w-full py-3 min-h-[44px] rounded-xl text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white transition">Entendi</button>
         </div>
     </div>
@@ -933,7 +923,7 @@
             ['all', 'pending', 'progress', 'done'].forEach(st => {
                 const btn = document.getElementById(`filter-btn-${st}`);
                 if (st === currentFilterStatus) {
-                    btn.className = 'filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold bg-blue-600 text-white shadow-xs transition';
+                    btn.className = 'filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-bold bg-blue-600 text-white shadow-sm transition';
                 } else {
                     btn.className = 'filter-chip shrink-0 whitespace-nowrap px-3.5 py-2 min-h-[38px] rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition';
                 }
@@ -1034,7 +1024,7 @@
                             <div class="flex items-start gap-2.5">
                                 <div class="mt-0.5 shrink-0">
                                     ${allDone 
-                                        ? '<span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-xs"><i class="ph-bold ph-check"></i></span>' 
+                                        ? '<span class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-sm"><i class="ph-bold ph-check"></i></span>' 
                                         : '<span class="w-5 h-5 rounded-full border-2 border-slate-300 dark:border-slate-600 flex items-center justify-center text-[10px] text-slate-400"></span>'
                                     }
                                 </div>
@@ -1074,7 +1064,7 @@
                             <div class="grid grid-cols-3 lg:flex items-center gap-1.5 w-full sm:w-auto">
                                 <button onclick="toggleTopicCheck('${topic.id}', 'teoria')" class="check-pill min-h-[42px] lg:min-h-0 px-2 sm:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 ${
                                     st.teoria 
-                                    ? 'bg-blue-600 text-white border-blue-600 shadow-xs' 
+                                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm' 
                                     : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                                 }">
                                     <i class="ph-bold ${st.teoria ? 'ph-check-square' : 'ph-square'} text-sm"></i>
@@ -1083,7 +1073,7 @@
 
                                 <button onclick="toggleTopicCheck('${topic.id}', 'revisao')" class="check-pill min-h-[42px] lg:min-h-0 px-2 sm:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 ${
                                     st.revisao 
-                                    ? 'bg-amber-500 text-white border-amber-500 shadow-xs' 
+                                    ? 'bg-amber-500 text-white border-amber-500 shadow-sm' 
                                     : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                                 }">
                                     <i class="ph-bold ${st.revisao ? 'ph-check-square' : 'ph-square'} text-sm"></i>
@@ -1092,7 +1082,7 @@
 
                                 <button onclick="toggleTopicCheck('${topic.id}', 'questoes')" class="check-pill min-h-[42px] lg:min-h-0 px-2 sm:px-2.5 py-2 lg:py-1.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 ${
                                     st.questoes 
-                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs' 
+                                    ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' 
                                     : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-800/90 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                                 }">
                                     <i class="ph-bold ${st.questoes ? 'ph-check-square' : 'ph-square'} text-sm"></i>
@@ -1523,7 +1513,7 @@
                 if (t === tabId) {
                     content.classList.remove('hidden');
                     if (btn) {
-                        btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-bold text-sm flex items-center gap-2 whitespace-nowrap bg-blue-600 text-white shadow-xs transition';
+                        btn.className = 'tab-btn px-3.5 py-2 rounded-xl font-bold text-sm flex items-center gap-2 whitespace-nowrap bg-blue-600 text-white shadow-sm transition';
                     }
                     if (mobileBtn) {
                         mobileBtn.className = 'mobile-tab-btn relative flex flex-col items-center justify-center gap-0.5 py-1.5 px-1 rounded-xl text-[11px] font-bold transition min-h-[50px] bg-blue-50 dark:bg-blue-950/70 text-blue-600 dark:text-blue-400';
@@ -1538,7 +1528,11 @@
                     }
                 }
             });
-            if (fromMobileNav && window.scrollY > 180) {
+            const summarySection = document.getElementById('dashboard-summary-section');
+            if (summarySection) {
+                summarySection.classList.toggle('hidden', tabId !== 'edital');
+            }
+            if (fromMobileNav) {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
@@ -1627,16 +1621,16 @@
             return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
         }
 
-        function isIOSSafari() {
+        function isIOSDevice() {
             const ua = window.navigator.userAgent || '';
-            const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-            const isWebkit = /WebKit/i.test(ua);
-            const isOtherBrowser = /CriOS|FxiOS|OPiOS|EdgiOS/i.test(ua);
-            return isIOS && isWebkit && !isOtherBrowser;
+            return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
         }
 
         function showPWAInstallButton() {
-            if (isRunningStandalone()) return;
+            if (isRunningStandalone()) {
+                hidePWAInstallButton();
+                return;
+            }
             const btn = document.getElementById('pwa-install-btn');
             if (btn) {
                 btn.classList.remove('hidden');
@@ -1651,6 +1645,10 @@
                 btn.classList.remove('flex');
             }
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (isRunningStandalone()) hidePWAInstallButton();
+        });
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -1675,21 +1673,33 @@
                 }
                 return;
             }
-            if (isIOSSafari()) {
-                const modal = document.getElementById('ios-install-modal');
-                if (modal) modal.classList.remove('hidden');
-                return;
+            const modal = document.getElementById('ios-install-modal');
+            const body = document.getElementById('install-modal-body');
+            if (modal && body) {
+                if (isIOSDevice()) {
+                    body.innerHTML = `
+                        <p>No <strong>iPhone / iPad</strong>, siga estes 2 passos rápidos para instalar na Tela de Início:</p>
+                        <ol class="space-y-2.5 text-slate-700 dark:text-slate-200">
+                            <li class="flex items-start gap-2.5"><span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span><span>Toque no botão <strong>Compartilhar</strong> <i class="ph-bold ph-export inline align-text-bottom"></i> (no rodapé do Safari ou no topo do Chrome).</span></li>
+                            <li class="flex items-start gap-2.5"><span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span><span>Role para baixo e toque em <strong>Adicionar à Tela de Início</strong>.</span></li>
+                        </ol>
+                    `;
+                } else {
+                    body.innerHTML = `
+                        <p>Para instalar este portal como aplicativo no <strong>Android (Chrome)</strong>:</p>
+                        <ol class="space-y-2.5 text-slate-700 dark:text-slate-200">
+                            <li class="flex items-start gap-2.5"><span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">1</span><span>Se abriu pelo <strong>WhatsApp</strong>, toque nos 3 pontinhos <strong>(⋮)</strong> no canto superior e escolha <strong>Abrir no Chrome</strong>.</span></li>
+                            <li class="flex items-start gap-2.5"><span class="w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">2</span><span>No Google Chrome, toque nos 3 pontinhos <strong>(⋮)</strong> e selecione <strong>Instalar aplicativo</strong> (ou <strong>Adicionar à tela inicial</strong>).</span></li>
+                        </ol>
+                    `;
+                }
+                modal.classList.remove('hidden');
             }
-            showToast('No menu do Chrome (⋮), toque em "Instalar aplicativo" ou "Adicionar à tela inicial".', 'info');
         }
 
         function closeIOSInstallModal() {
             const modal = document.getElementById('ios-install-modal');
             if (modal) modal.classList.add('hidden');
-        }
-
-        if (isIOSSafari() && !isRunningStandalone()) {
-            window.addEventListener('DOMContentLoaded', showPWAInstallButton);
         }
 
         if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
@@ -1755,18 +1765,14 @@
                     flashcards: snap.flashcards,
                     detail: String(detail || '').slice(0, 140)
                 });
-                if (navigator.sendBeacon) {
-                    const blob = new Blob([payload], { type: 'text/plain;charset=UTF-8' });
-                    navigator.sendBeacon(TELEMETRY_ENDPOINT, blob);
-                } else {
-                    fetch(TELEMETRY_ENDPOINT, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-                        body: payload,
-                        keepalive: true
-                    }).catch(() => {});
-                }
+                fetch(TELEMETRY_ENDPOINT, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                    body: payload,
+                    redirect: 'follow',
+                    keepalive: true
+                }).catch(() => {});
             } catch (err) {}
         }
 
